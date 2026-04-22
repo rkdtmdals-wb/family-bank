@@ -691,6 +691,23 @@ body {
 
 .hidden { display: none !important; }
 
+/* 안내 배너 */
+.info-banner {
+  background: #FFF4D6;
+  border: var(--border-thin);
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  box-shadow: var(--shadow-sm);
+}
+.info-banner.admin {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
 /* Firebase 연결 상태 */
 .sync-indicator {
   display: inline-flex;
@@ -1333,6 +1350,15 @@ function renderHome() {
   // 카테고리별로 그룹
   const cats = [...new Set(REWARDS.map(r => r.cat))];
   return `
+    ${!isAdmin ? `
+      <div class="info-banner">
+        🔒 보상 버튼을 누르면 부모님 비밀번호가 필요해요! 부모님 확인 후에만 돈이 들어와요.
+      </div>
+    ` : `
+      <div class="info-banner admin">
+        🔓 부모님 모드: 보상 버튼을 바로 누를 수 있어요.
+      </div>
+    `}
     <div class="kids-grid">
       ${state.kids.map((kid, i) => {
         const activeCat = rewardCat[kid.id] || cats[0];
@@ -1674,8 +1700,20 @@ function attachHandlers() {
   document.querySelectorAll('[data-action]').forEach(el => {
     el.onclick = () => {
       const a = el.dataset.action;
-      if (a === 'reward')         addReward(el.dataset.kid, el.dataset.reward);
-      else if (a === 'undo')      undoLastReward(el.dataset.kid);
+      if (a === 'reward') {
+        if (isAdmin) {
+          addReward(el.dataset.kid, el.dataset.reward);
+        } else {
+          passwordModal(() => addReward(el.dataset.kid, el.dataset.reward));
+        }
+      }
+      else if (a === 'undo') {
+        if (isAdmin) {
+          undoLastReward(el.dataset.kid);
+        } else {
+          passwordModal(() => undoLastReward(el.dataset.kid));
+        }
+      }
       else if (a === 'reward-cat'){ rewardCat[el.dataset.kid] = el.dataset.cat; render(); }
       else if (a === 'select-kid'){ selectedChild = el.dataset.kid; render(); }
       else if (a === 'clear-selected'){ selectedChild = null; render(); }
