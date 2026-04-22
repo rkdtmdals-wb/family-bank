@@ -1,0 +1,1704 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>우리집 경제학교 🏦</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Gowun+Dodum&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- Firebase SDK (ES Module, CDN) -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+  import { getDatabase, ref, onValue, set, update, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCWFPCqrKSIDosN7o1RtVxZEpKcSQ55xIM",
+    authDomain: "family-bank-7d27d.firebaseapp.com",
+    databaseURL: "https://family-bank-7d27d-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "family-bank-7d27d",
+    storageBucket: "family-bank-7d27d.firebasestorage.app",
+    messagingSenderId: "1038349484617",
+    appId: "1:1038349484617:web:905dfb5274f5ac09d27598"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const dbRef = ref(db, 'familyBank/state');
+  const connRef = ref(db, '.info/connected');
+
+  // 전역 노출 (일반 스크립트에서 쓰기 위해)
+  window.__firebase = { db, ref, onValue, set, update, serverTimestamp, dbRef, connRef };
+  window.dispatchEvent(new Event('firebase-ready'));
+</script>
+<style>
+:root {
+  --bg: #FFF8EF;
+  --bg-2: #FFE8D6;
+  --surface: #FFFFFF;
+  --ink: #2B2318;
+  --ink-soft: #6B5F50;
+  --primary: #F26A4B;       /* 따뜻한 오렌지 */
+  --primary-soft: #FFDBCF;
+  --accent: #3D7A5B;        /* 저금통 초록 */
+  --accent-soft: #D7EFDF;
+  --gold: #E4A94C;          /* 동전 금색 */
+  --danger: #D14343;
+  --shadow: 6px 6px 0 #2B2318;
+  --shadow-sm: 3px 3px 0 #2B2318;
+  --border: 3px solid #2B2318;
+  --border-thin: 2px solid #2B2318;
+  --radius: 18px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'IBM Plex Sans KR', -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+  background-image:
+    radial-gradient(circle at 20% 10%, var(--primary-soft) 0%, transparent 30%),
+    radial-gradient(circle at 80% 80%, var(--accent-soft) 0%, transparent 35%);
+}
+
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px 20px 60px;
+}
+
+/* ===== 헤더 ===== */
+.header {
+  background: var(--surface);
+  border: var(--border);
+  border-radius: var(--radius);
+  padding: 24px 28px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.header h1 {
+  font-family: 'Gaegu', cursive;
+  font-size: 38px;
+  letter-spacing: -1px;
+  line-height: 1;
+}
+
+.header h1 .emoji { display: inline-block; transform: translateY(2px); }
+
+.header p {
+  font-size: 14px;
+  color: var(--ink-soft);
+  margin-top: 4px;
+}
+
+.admin-btn {
+  background: var(--ink);
+  color: var(--surface);
+  border: var(--border);
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.admin-btn:hover { transform: translate(-1px,-1px); box-shadow: 4px 4px 0 var(--ink); }
+.admin-btn:active { transform: translate(1px,1px); box-shadow: 1px 1px 0 var(--ink); }
+.admin-btn.on { background: var(--primary); }
+
+/* ===== 탭 네비게이션 ===== */
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  background: var(--surface);
+  border: var(--border);
+  border-radius: var(--radius);
+  padding: 10px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow);
+}
+
+.tab {
+  background: transparent;
+  border: var(--border-thin);
+  border-radius: 12px;
+  padding: 12px 8px;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  color: var(--ink);
+  transition: all 0.15s;
+}
+.tab:hover { background: var(--bg-2); }
+.tab.active {
+  background: var(--ink);
+  color: var(--surface);
+  border-color: var(--ink);
+}
+.tab .emoji { display: block; font-size: 22px; margin-bottom: 4px; }
+
+/* ===== 공통 카드 ===== */
+.card {
+  background: var(--surface);
+  border: var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow);
+  margin-bottom: 16px;
+}
+.card h2 {
+  font-family: 'Gaegu', cursive;
+  font-size: 28px;
+  margin-bottom: 16px;
+}
+.card h3 {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.child-selector {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.child-selector button {
+  padding: 16px;
+  background: var(--surface);
+  border: var(--border);
+  border-radius: 14px;
+  font-family: 'Gaegu', cursive;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.15s;
+  color: var(--ink);
+}
+.child-selector button:hover { transform: translate(-1px,-1px); box-shadow: 4px 4px 0 var(--ink); }
+.child-selector button.active {
+  background: var(--primary);
+  color: var(--surface);
+  border-color: var(--ink);
+}
+
+/* ===== 홈 자녀 카드 ===== */
+.kids-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+@media (max-width: 720px) {
+  .kids-grid { grid-template-columns: 1fr; }
+  .tabs { grid-template-columns: repeat(3, 1fr); }
+  .tabs .tab:nth-child(4), .tabs .tab:nth-child(5) { grid-column: span 1; }
+  .header h1 { font-size: 30px; }
+  .child-selector button { font-size: 20px; }
+}
+
+.kid-card { background: var(--surface); }
+.kid-card.pink { background: linear-gradient(160deg, #FFEEE5 0%, #FFFFFF 60%); }
+.kid-card.mint { background: linear-gradient(160deg, #E3F3E9 0%, #FFFFFF 60%); }
+
+.kid-name {
+  font-family: 'Gaegu', cursive;
+  font-size: 32px;
+  margin-bottom: 4px;
+}
+.balance-big {
+  font-size: 14px;
+  color: var(--ink-soft);
+  margin-bottom: 6px;
+}
+.balance-amount {
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--primary);
+  font-family: 'IBM Plex Sans KR', sans-serif;
+  margin-bottom: 16px;
+  letter-spacing: -1px;
+}
+.balance-amount .unit { font-size: 18px; color: var(--ink-soft); font-weight: 500; margin-left: 4px; }
+
+.reward-grid { display: grid; gap: 8px; }
+
+.reward-cat-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.reward-cat-btn {
+  padding: 6px 12px;
+  border: var(--border-thin);
+  border-radius: 14px;
+  background: var(--surface);
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 12px;
+  cursor: pointer;
+  color: var(--ink);
+  transition: all 0.15s;
+}
+.reward-cat-btn.active {
+  background: var(--ink);
+  color: var(--surface);
+}
+.reward-cat-btn:hover:not(.active) { background: var(--bg-2); }
+
+.reward-btn {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 18px;
+  background: var(--accent);
+  color: var(--surface);
+  border: var(--border-thin);
+  border-color: var(--ink);
+  border-radius: 12px;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.15s;
+  font-size: 15px;
+}
+.reward-btn:hover:not(:disabled) { transform: translate(-1px,-1px); box-shadow: 4px 4px 0 var(--ink); }
+.reward-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.reward-btn .amount { font-family: 'IBM Plex Sans KR', sans-serif; font-weight: 700; font-size: 16px; }
+
+.undo-btn {
+  margin-top: 12px;
+  padding: 12px;
+  width: 100%;
+  background: var(--bg-2);
+  color: var(--ink);
+  border: var(--border-thin);
+  border-radius: 12px;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 13px;
+  transition: background 0.15s;
+}
+.undo-btn:hover { background: var(--primary-soft); }
+
+/* ===== 자산 페이지 ===== */
+.asset-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+@media (max-width: 720px) { .asset-row { grid-template-columns: 1fr 1fr; } }
+
+.asset-box {
+  padding: 16px;
+  border: var(--border-thin);
+  border-radius: 14px;
+  background: var(--bg);
+}
+.asset-box.cash { background: var(--primary-soft); }
+.asset-box.stock { background: var(--accent-soft); }
+.asset-box.savings { background: #FFF4D6; }
+.asset-box.total { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+
+.asset-label { font-size: 12px; opacity: 0.8; margin-bottom: 4px; font-weight: 500; }
+.asset-value { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+.asset-value .unit { font-size: 13px; opacity: 0.7; font-weight: 500; margin-left: 2px; }
+.asset-sub { font-size: 11px; opacity: 0.7; margin-top: 4px; }
+
+/* ===== 거래 내역 ===== */
+.tx-list {
+  max-height: 320px;
+  overflow-y: auto;
+  display: grid;
+  gap: 8px;
+}
+.tx-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 14px;
+  background: var(--bg);
+  border: var(--border-thin);
+  border-radius: 10px;
+  font-size: 14px;
+}
+.tx-desc { font-weight: 600; }
+.tx-time { font-size: 11px; color: var(--ink-soft); margin-top: 2px; }
+.tx-amount { font-weight: 700; font-size: 16px; }
+.tx-amount.plus { color: var(--accent); }
+.tx-amount.minus { color: var(--danger); }
+
+/* ===== 상점 ===== */
+.shop-category-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+.shop-cat-btn {
+  padding: 8px 14px;
+  border: var(--border-thin);
+  border-radius: 20px;
+  background: var(--surface);
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.shop-cat-btn.active { background: var(--ink); color: var(--surface); }
+.shop-cat-btn:hover:not(.active) { background: var(--bg-2); }
+
+.shop-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 14px;
+}
+
+.shop-item {
+  border: var(--border-thin);
+  border-radius: 14px;
+  padding: 16px;
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  transition: all 0.15s;
+}
+.shop-item:hover { transform: translate(-1px,-1px); box-shadow: var(--shadow-sm); }
+.shop-item.affordable { border-color: var(--accent); }
+
+.shop-emoji { font-size: 36px; margin-bottom: 8px; }
+.shop-name { font-weight: 600; font-size: 14px; margin-bottom: 4px; flex: 1; }
+.shop-price { font-weight: 700; font-size: 18px; color: var(--primary); margin-bottom: 10px; }
+.shop-buy {
+  padding: 10px;
+  background: var(--accent);
+  color: var(--surface);
+  border: var(--border-thin);
+  border-radius: 10px;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.shop-buy:hover:not(:disabled) { background: #2f6148; }
+.shop-buy:disabled { background: #CCC; cursor: not-allowed; color: #888; }
+
+/* ===== 주식 ===== */
+.stock-list { display: grid; gap: 12px; }
+.stock-row {
+  padding: 16px;
+  border: var(--border-thin);
+  border-radius: 14px;
+  background: var(--surface);
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr auto;
+  align-items: center;
+  gap: 12px;
+}
+@media (max-width: 720px) {
+  .stock-row { grid-template-columns: 1fr 1fr; }
+  .stock-row .stock-info-col { grid-column: 1 / -1; }
+}
+.stock-info-col { display: flex; flex-direction: column; }
+.stock-ticker { font-family: 'IBM Plex Sans KR', monospace; font-size: 11px; color: var(--ink-soft); }
+.stock-name { font-weight: 700; font-size: 16px; }
+.stock-price-col { text-align: right; }
+.stock-price { font-weight: 700; font-size: 18px; }
+.stock-change { font-size: 12px; font-weight: 600; margin-top: 2px; }
+.stock-change.up { color: var(--danger); }
+.stock-change.down { color: #2B5AC4; }
+.stock-held { font-size: 12px; color: var(--ink-soft); text-align: center; }
+.stock-held strong { font-size: 15px; color: var(--ink); display: block; }
+.stock-actions { display: flex; gap: 6px; }
+.stock-btn {
+  padding: 8px 14px;
+  border: var(--border-thin);
+  border-radius: 8px;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 13px;
+  background: var(--surface);
+  transition: all 0.1s;
+}
+.stock-btn.buy { background: var(--danger); color: var(--surface); }
+.stock-btn.sell { background: #2B5AC4; color: var(--surface); }
+.stock-btn:hover:not(:disabled) { transform: translateY(-1px); }
+.stock-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.market-info {
+  background: var(--bg-2);
+  border: var(--border-thin);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.market-info .label { font-size: 13px; color: var(--ink-soft); }
+.market-info .value { font-weight: 700; }
+
+/* ===== 예금 ===== */
+.deposit-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.deposit-option {
+  padding: 16px;
+  border: var(--border-thin);
+  border-radius: 12px;
+  background: #FFF8D6;
+  text-align: center;
+}
+.deposit-option .period { font-weight: 700; font-size: 16px; }
+.deposit-option .rate { font-size: 24px; font-weight: 700; color: var(--gold); margin: 6px 0; font-family: 'IBM Plex Sans KR'; }
+.deposit-option .desc { font-size: 11px; color: var(--ink-soft); }
+
+.deposit-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+@media (max-width: 720px) { .deposit-form { grid-template-columns: 1fr; } }
+
+.form-input, .form-select {
+  padding: 12px;
+  border: var(--border-thin);
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 14px;
+  background: var(--surface);
+}
+
+.deposit-list {
+  display: grid;
+  gap: 10px;
+}
+.deposit-item {
+  padding: 14px;
+  border: var(--border-thin);
+  border-radius: 12px;
+  background: #FFF8D6;
+}
+.deposit-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.deposit-amount { font-weight: 700; font-size: 16px; }
+.deposit-progress { height: 8px; background: var(--surface); border: 1px solid var(--ink); border-radius: 4px; overflow: hidden; margin: 8px 0; }
+.deposit-progress-bar { height: 100%; background: var(--gold); transition: width 0.5s; }
+.deposit-meta { font-size: 12px; color: var(--ink-soft); display: flex; justify-content: space-between; }
+.withdraw-btn {
+  margin-top: 8px;
+  padding: 8px 14px;
+  background: var(--ink);
+  color: var(--surface);
+  border: var(--border-thin);
+  border-radius: 8px;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 12px;
+}
+.withdraw-btn.ready { background: var(--accent); }
+
+/* ===== 쿠폰 ===== */
+.coupon-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
+}
+.coupon {
+  background: linear-gradient(135deg, #FFF4D6, #FFE8B0);
+  border: 3px dashed var(--ink);
+  border-radius: 14px;
+  padding: 18px;
+  position: relative;
+  overflow: hidden;
+}
+.coupon.used { opacity: 0.5; background: var(--bg-2); }
+.coupon .emoji { font-size: 32px; margin-bottom: 6px; }
+.coupon .coupon-name { font-weight: 700; font-size: 16px; margin-bottom: 4px; }
+.coupon .coupon-owner { font-size: 12px; color: var(--ink-soft); font-weight: 600; }
+.coupon .coupon-date { font-size: 11px; color: var(--ink-soft); margin-top: 4px; }
+.coupon .coupon-price { display: inline-block; padding: 3px 8px; background: var(--primary); color: var(--surface); border-radius: 6px; font-size: 11px; font-weight: 700; margin-top: 6px; }
+.coupon-actions { display: flex; gap: 6px; margin-top: 10px; }
+.coupon .use-btn, .coupon .del-btn {
+  padding: 6px 12px;
+  border: var(--border-thin);
+  border-radius: 8px;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 12px;
+  flex: 1;
+}
+.coupon .use-btn { background: var(--accent); color: var(--surface); }
+.coupon .del-btn { background: var(--surface); color: var(--ink); }
+.coupon .used-stamp {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  color: var(--danger);
+  font-weight: 700;
+  font-size: 14px;
+  border: 2px solid var(--danger);
+  padding: 2px 6px;
+  border-radius: 4px;
+  transform: rotate(8deg);
+}
+
+/* ===== 빈 상태 ===== */
+.empty {
+  text-align: center;
+  padding: 32px;
+  color: var(--ink-soft);
+  font-size: 14px;
+}
+
+/* ===== 토스트 ===== */
+.toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 14px 20px;
+  background: var(--ink);
+  color: var(--surface);
+  border-radius: 10px;
+  box-shadow: var(--shadow-sm);
+  font-weight: 600;
+  font-size: 14px;
+  z-index: 2000;
+  animation: slideIn 0.3s ease;
+  max-width: 320px;
+}
+.toast.success { background: var(--accent); }
+.toast.error { background: var(--danger); }
+
+@keyframes slideIn {
+  from { transform: translateX(120%); }
+  to { transform: translateX(0); }
+}
+
+/* ===== 모달 ===== */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+  padding: 20px;
+}
+.modal-content {
+  background: var(--surface);
+  border: var(--border);
+  border-radius: var(--radius);
+  padding: 28px;
+  max-width: 420px;
+  width: 100%;
+  box-shadow: var(--shadow);
+}
+.modal-content h3 {
+  font-family: 'Gaegu', cursive;
+  font-size: 26px;
+  margin-bottom: 12px;
+}
+.modal-content p { font-size: 14px; color: var(--ink-soft); margin-bottom: 16px; }
+.modal-input {
+  width: 100%;
+  padding: 12px;
+  border: var(--border-thin);
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 15px;
+  margin-bottom: 16px;
+}
+.modal-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.modal-buttons button {
+  padding: 12px;
+  border: var(--border-thin);
+  border-radius: 10px;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 14px;
+}
+.modal-buttons .cancel { background: var(--bg); }
+.modal-buttons .confirm { background: var(--primary); color: var(--surface); }
+
+/* Admin 섹션 */
+.admin-section {
+  background: #FFF4D6;
+  border: var(--border-thin);
+  border-radius: 12px;
+  padding: 14px;
+  margin-top: 12px;
+}
+.admin-section h4 { font-size: 14px; margin-bottom: 8px; }
+.admin-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 13px; }
+.admin-row input { padding: 8px; border: var(--border-thin); border-radius: 6px; font-family: inherit; font-size: 13px; width: 100px; }
+.admin-row button { padding: 8px 12px; background: var(--ink); color: var(--surface); border: var(--border-thin); border-radius: 6px; font-family: inherit; font-weight: 600; cursor: pointer; font-size: 12px; }
+
+.hidden { display: none !important; }
+
+/* Firebase 연결 상태 */
+.sync-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 14px;
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--bg-2);
+  border: 1px solid var(--ink);
+  margin-left: 8px;
+}
+.sync-indicator .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #aaa;
+}
+.sync-indicator.online .dot { background: var(--accent); animation: pulse 2s infinite; }
+.sync-indicator.offline .dot { background: var(--danger); }
+.sync-indicator.syncing .dot { background: var(--gold); animation: pulse 0.8s infinite; }
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* 스크롤바 */
+.tx-list::-webkit-scrollbar { width: 6px; }
+.tx-list::-webkit-scrollbar-track { background: var(--bg); }
+.tx-list::-webkit-scrollbar-thumb { background: var(--ink-soft); border-radius: 3px; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- 헤더 -->
+  <header class="header">
+    <div>
+      <h1><span class="emoji">🏦</span> 우리집 경제학교
+        <span id="sync-badge" class="sync-indicator syncing">
+          <span class="dot"></span><span id="sync-text">연결중...</span>
+        </span>
+      </h1>
+      <p>칭찬도 받고, 저금도 하고, 투자도 해보자!</p>
+    </div>
+    <button id="admin-toggle" class="admin-btn">🔒 부모님 모드</button>
+  </header>
+
+  <!-- 탭 -->
+  <nav class="tabs">
+    <button class="tab active" data-view="home"><span class="emoji">🏠</span>홈</button>
+    <button class="tab" data-view="assets"><span class="emoji">💰</span>내자산</button>
+    <button class="tab" data-view="shop"><span class="emoji">🛒</span>상점</button>
+    <button class="tab" data-view="stock"><span class="emoji">📈</span>주식</button>
+    <button class="tab" data-view="bank"><span class="emoji">🏦</span>예금</button>
+  </nav>
+
+  <div id="view"></div>
+</div>
+
+<script>
+/* =========================================================
+   데이터 모델 & 저장
+========================================================= */
+const STORAGE_KEY = 'family_reward_v2';
+
+const DEFAULT_STATE = {
+  kids: [
+    { id: 'k1', name: '다현', balance: 0 },
+    { id: 'k2', name: '선우', balance: 0 }
+  ],
+  transactions: [],    // {id, kidId, type, amount, desc, ts}
+  coupons: [],         // {id, kidId, itemId, name, emoji, price, ts, used, usedAt}
+  holdings: {},        // { kidId: { ticker: shares } }
+  deposits: [],        // {id, kidId, amount, startTs, termDays, rate, withdrawnAt}
+  stocks: {
+    '005930': { name: '삼성전자',    ticker: '005930', price: 216500,  base: 216500 },
+    '000660': { name: 'SK하이닉스', ticker: '000660', price: 1170000, base: 1170000 },
+    '005380': { name: '현대차',      ticker: '005380', price: 531000,  base: 531000 },
+    '035720': { name: '카카오',      ticker: '035720', price: 49250,   base: 49250 },
+    '035420': { name: '네이버',      ticker: '035420', price: 217000,  base: 217000 }
+  },
+  lastStockUpdate: null,   // YYYY-MM-DD
+  adminPassword: '5555'
+};
+
+const DEPOSIT_TERMS = [
+  { key: 'free',  label: '자유',     days: 0,   rate: 0.02 },   // 언제든 출금, 연 2%
+  { key: '1m',    label: '1개월',    days: 30,  rate: 0.028 },  // 연 2.8%
+  { key: '3m',    label: '3개월',    days: 90,  rate: 0.032 },  // 연 3.2%
+  { key: '6m',    label: '6개월',    days: 180, rate: 0.038 },  // 연 3.8%
+  { key: '1y',    label: '1년',      days: 365, rate: 0.045 }   // 연 4.5%
+];
+
+const REWARDS = [
+  // 학습
+  { id: 'study',        name: '공부 스스로 열심히',   amount: 2000, emoji: '📚', cat: '학습' },
+  { id: 'reading',      name: '책 한 권 읽기',        amount: 1500, emoji: '📖', cat: '학습' },
+  { id: 'homework',     name: '숙제 끝까지 완료',     amount: 1000, emoji: '✏️', cat: '학습' },
+  { id: 'diary',        name: '일기 쓰기',            amount: 500,  emoji: '📓', cat: '학습' },
+  { id: 'test_score',   name: '시험 잘 봤을 때',      amount: 5000, emoji: '💯', cat: '학습' },
+  { id: 'new_learn',    name: '새로운 것 배우기',     amount: 2000, emoji: '🎓', cat: '학습' },
+
+  // 집안일·생활
+  { id: 'clean_room',   name: '방 청소 깔끔하게',     amount: 1000, emoji: '🧹', cat: '생활' },
+  { id: 'chores',       name: '집안일 돕기',          amount: 500,  emoji: '🏠', cat: '생활' },
+  { id: 'dishes',       name: '설거지 돕기',          amount: 800,  emoji: '🍽️', cat: '생활' },
+  { id: 'laundry',      name: '빨래 개기',            amount: 700,  emoji: '👕', cat: '생활' },
+  { id: 'trash',        name: '분리수거 돕기',        amount: 500,  emoji: '♻️', cat: '생활' },
+  { id: 'make_bed',     name: '이불 스스로 정리',     amount: 300,  emoji: '🛏️', cat: '생활' },
+  { id: 'pet_care',     name: '반려동물 돌보기',      amount: 700,  emoji: '🐶', cat: '생활' },
+
+  // 건강·운동
+  { id: 'exercise',     name: '운동하기',             amount: 500,  emoji: '⚽', cat: '건강' },
+  { id: 'early_sleep',  name: '일찍 잠자기',          amount: 500,  emoji: '😴', cat: '건강' },
+  { id: 'eat_well',     name: '반찬 골고루 먹기',     amount: 400,  emoji: '🥗', cat: '건강' },
+  { id: 'brush_teeth',  name: '양치 꼼꼼히',          amount: 200,  emoji: '🪥', cat: '건강' },
+
+  // 인성·태도
+  { id: 'help_family',  name: '가족 도와주기',        amount: 500,  emoji: '🤝', cat: '태도' },
+  { id: 'polite',       name: '인사 잘하기',          amount: 300,  emoji: '🙇', cat: '태도' },
+  { id: 'no_fight',     name: '하루종일 안 싸우기',   amount: 1000, emoji: '☮️', cat: '태도' },
+  { id: 'share',        name: '양보·나누기',          amount: 800,  emoji: '💝', cat: '태도' },
+  { id: 'apology',      name: '먼저 사과하기',        amount: 1000, emoji: '🌱', cat: '태도' },
+  { id: 'patience',     name: '참을성 발휘',          amount: 800,  emoji: '🧘', cat: '태도' },
+
+  // 보너스
+  { id: 'surprise',     name: '깜짝 칭찬 보너스',     amount: 3000, emoji: '🎁', cat: '보너스' },
+  { id: 'allowance',    name: '주간 용돈',            amount: 5000, emoji: '💰', cat: '보너스' }
+];
+
+const SHOP = {
+  snack: {
+    label: '🍪 간식·음식',
+    items: [
+      { id: 'candy',     name: '사탕 1개',        price: 500,   emoji: '🍬' },
+      { id: 'chocolate', name: '초콜릿',          price: 1500,  emoji: '🍫' },
+      { id: 'icecream',  name: '아이스크림',      price: 2000,  emoji: '🍦' },
+      { id: 'cookie',    name: '과자 한 봉지',    price: 2500,  emoji: '🍪' },
+      { id: 'pizza',     name: '피자 한 판',      price: 25000, emoji: '🍕' },
+      { id: 'chicken',   name: '치킨 한 마리',    price: 23000, emoji: '🍗' }
+    ]
+  },
+  school: {
+    label: '✏️ 학용품',
+    items: [
+      { id: 'pencil',    name: '연필 1자루',      price: 500,   emoji: '✏️' },
+      { id: 'eraser',    name: '지우개',          price: 800,   emoji: '🧽' },
+      { id: 'notebook',  name: '노트',            price: 2000,  emoji: '📒' },
+      { id: 'pen',       name: '볼펜 세트',       price: 3500,  emoji: '🖊️' },
+      { id: 'sketchbook',name: '스케치북',        price: 4000,  emoji: '🎨' }
+    ]
+  },
+  toy: {
+    label: '🎁 장난감',
+    items: [
+      { id: 'sticker',   name: '스티커',          price: 1000,  emoji: '⭐' },
+      { id: 'lego_small',name: '레고 작은 세트',  price: 15000, emoji: '🧱' },
+      { id: 'puzzle',    name: '퍼즐',            price: 12000, emoji: '🧩' },
+      { id: 'doll',      name: '인형',            price: 18000, emoji: '🧸' }
+    ]
+  },
+  book: {
+    label: '📚 도서·책',
+    items: [
+      { id: 'novel',     name: '동화책',          price: 12000, emoji: '📘' },
+      { id: 'magazine',  name: '어린이 잡지',     price: 6000,  emoji: '📰' },
+      { id: 'science',   name: '과학책',          price: 15000, emoji: '🔬' }
+    ]
+  },
+  family: {
+    label: '👨‍👩‍👧‍👦 가족시간',
+    items: [
+      { id: 'dining_out',name: '외식 같이하기',   price: 30000, emoji: '🍽️' },
+      { id: 'movie',     name: '영화관 관람',     price: 15000, emoji: '🎬' },
+      { id: 'cafe',      name: '카페 가기',       price: 8000,  emoji: '☕' },
+      { id: 'park',      name: '놀이공원',        price: 50000, emoji: '🎢' },
+      { id: 'daytrip',   name: '당일치기 여행',   price: 80000, emoji: '🚗' }
+    ]
+  },
+  right: {
+    label: '✨ 권리권',
+    items: [
+      { id: 'homework_pass',name: '숙제 면제권',      price: 10000, emoji: '📝' },
+      { id: 'late_sleep',   name: '늦게 자기 (1시간)',price: 3000,  emoji: '😴' },
+      { id: 'tv_1h',        name: 'TV 1시간 더',      price: 1500,  emoji: '📺' },
+      { id: 'choose_menu',  name: '저녁 메뉴 선택권', price: 4000,  emoji: '🍱' }
+    ]
+  }
+};
+
+let state = structuredClone(DEFAULT_STATE);  // Firebase에서 실제 데이터 받기 전까지 기본값
+let currentView = 'home';
+let selectedChild = null;   // 상점에서 쓰이는 선택된 아이
+let shopCategory = 'snack';
+let rewardCat = {};         // { kidId: '학습' ... } 홈 화면의 보상 카테고리
+let isAdmin = false;
+let isOnline = false;       // Firebase 연결 상태
+let suppressNextSave = false; // Firebase에서 받은 업데이트를 다시 저장하지 않도록
+let saveTimer = null;       // 디바운스용
+let initialLoadDone = false;
+
+/* =========================================================
+   Firebase 연동
+========================================================= */
+function mergeWithDefaults(saved) {
+  const merged = { ...structuredClone(DEFAULT_STATE), ...(saved || {}) };
+  merged.kids         = saved?.kids         || DEFAULT_STATE.kids;
+  merged.stocks       = { ...DEFAULT_STATE.stocks, ...((saved?.stocks) || {}) };
+  merged.holdings     = saved?.holdings     || {};
+  merged.deposits     = saved?.deposits     || [];
+  merged.coupons      = saved?.coupons      || [];
+  merged.transactions = saved?.transactions || [];
+  return merged;
+}
+
+// 로컬 백업 (오프라인 대비)
+function loadLocalBackup() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    return mergeWithDefaults(JSON.parse(raw));
+  } catch (e) {
+    return null;
+  }
+}
+
+function saveLocalBackup() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
+}
+
+// 연결 상태 UI
+function updateSyncBadge(status, text) {
+  const badge = document.getElementById('sync-badge');
+  const textEl = document.getElementById('sync-text');
+  if (!badge) return;
+  badge.className = 'sync-indicator ' + status;
+  if (textEl) textEl.textContent = text;
+}
+
+function initFirebase() {
+  const fb = window.__firebase;
+  if (!fb) {
+    // Firebase 로드 실패 시 로컬 모드로 작동
+    console.warn('Firebase 사용 불가 - 로컬 모드');
+    updateSyncBadge('offline', '오프라인 모드');
+    const backup = loadLocalBackup();
+    if (backup) state = backup;
+    initialLoadDone = true;
+    render();
+    return;
+  }
+
+  // 1) 연결 상태 감지
+  fb.onValue(fb.connRef, (snap) => {
+    isOnline = !!snap.val();
+    if (isOnline) {
+      updateSyncBadge('online', '실시간 연결됨');
+    } else {
+      updateSyncBadge('offline', '연결 끊김 (로컬 저장)');
+    }
+  });
+
+  // 2) 데이터 실시간 구독 (누가 바꾸든 즉시 반영)
+  fb.onValue(fb.dbRef, (snap) => {
+    const data = snap.val();
+    if (data) {
+      // Firebase 데이터 수신 → state 갱신
+      state = mergeWithDefaults(data);
+      saveLocalBackup();
+    } else {
+      // 첫 사용: Firebase가 비어있음. 로컬 백업이 있으면 업로드
+      const backup = loadLocalBackup();
+      if (backup) state = backup;
+      // 곧바로 업로드 (빈 DB 초기화)
+      scheduleSave(true);
+    }
+    initialLoadDone = true;
+    render();
+  }, (err) => {
+    console.error('Firebase 읽기 실패:', err);
+    updateSyncBadge('offline', '연결 실패');
+    const backup = loadLocalBackup();
+    if (backup) state = backup;
+    initialLoadDone = true;
+    render();
+  });
+}
+
+// 저장(=Firebase 업로드). 짧은 시간에 여러 번 호출되면 묶어서 한 번만 전송(디바운스)
+function scheduleSave(immediate = false) {
+  saveLocalBackup(); // 로컬 백업은 즉시
+  const fb = window.__firebase;
+  if (!fb) return;
+
+  updateSyncBadge('syncing', '동기화 중...');
+  clearTimeout(saveTimer);
+  const delay = immediate ? 0 : 250;
+  saveTimer = setTimeout(async () => {
+    try {
+      await fb.set(fb.dbRef, state);
+      if (isOnline) updateSyncBadge('online', '실시간 연결됨');
+    } catch (e) {
+      console.error('저장 실패:', e);
+      updateSyncBadge('offline', '저장 실패 (로컬 보관됨)');
+    }
+  }, delay);
+}
+
+// 기존 코드 호환용 별칭
+function saveState() { scheduleSave(); }
+
+/* =========================================================
+   공통 유틸
+========================================================= */
+const uid = () => Math.random().toString(36).slice(2, 10);
+const now = () => new Date().toISOString();
+const fmt = (n) => Math.round(n).toLocaleString('ko-KR');
+const todayKey = () => new Date().toISOString().slice(0,10);
+
+function getKid(id) { return state.kids.find(k => k.id === id); }
+
+function getHeld(kidId, ticker) {
+  return (state.holdings[kidId] && state.holdings[kidId][ticker]) || 0;
+}
+function setHeld(kidId, ticker, shares) {
+  if (!state.holdings[kidId]) state.holdings[kidId] = {};
+  state.holdings[kidId][ticker] = shares;
+  if (shares <= 0) delete state.holdings[kidId][ticker];
+}
+
+function calcStockValue(kidId) {
+  const h = state.holdings[kidId] || {};
+  return Object.keys(h).reduce((sum, t) => sum + h[t] * (state.stocks[t]?.price || 0), 0);
+}
+
+function calcActiveDeposits(kidId) {
+  return state.deposits.filter(d => d.kidId === kidId && !d.withdrawnAt);
+}
+
+function calcDepositValue(kidId) {
+  return calcActiveDeposits(kidId).reduce((sum, d) => sum + calcDepositCurrentValue(d), 0);
+}
+
+function calcDepositCurrentValue(deposit) {
+  const start = new Date(deposit.startTs);
+  const now = new Date();
+  const daysPassed = Math.max(0, (now - start) / (1000 * 60 * 60 * 24));
+  // 단리: 원금 * (1 + 연이율 * (일수/365))
+  return deposit.amount * (1 + deposit.rate * (daysPassed / 365));
+}
+
+function isDepositMature(deposit) {
+  if (deposit.termDays === 0) return true;
+  const start = new Date(deposit.startTs);
+  const mature = new Date(start.getTime() + deposit.termDays * 24 * 60 * 60 * 1000);
+  return new Date() >= mature;
+}
+
+function addTx(kidId, type, amount, desc) {
+  const tx = { id: uid(), kidId, type, amount, desc, ts: now() };
+  state.transactions.unshift(tx);
+  // 잔액 업데이트
+  const kid = getKid(kidId);
+  if (kid) kid.balance += amount;
+}
+
+/* =========================================================
+   주식 가격 자동 변동 (하루 1회)
+========================================================= */
+function updateStockPricesIfNeeded() {
+  const today = todayKey();
+  if (state.lastStockUpdate === today) return;
+
+  Object.keys(state.stocks).forEach(ticker => {
+    const stock = state.stocks[ticker];
+    // -3% ~ +3% 랜덤 변동, 기준가의 ±30% 이내로 제한
+    const change = (Math.random() - 0.5) * 0.06; // ±3%
+    let newPrice = stock.price * (1 + change);
+    const floor = stock.base * 0.7;
+    const ceil  = stock.base * 1.3;
+    newPrice = Math.min(Math.max(newPrice, floor), ceil);
+    // 종목별 호가단위 맞추기 (간단히 100원 반올림, 1000원 이상은 1000원 단위)
+    const tick = newPrice >= 100000 ? 1000 : 100;
+    stock.price = Math.round(newPrice / tick) * tick;
+  });
+  state.lastStockUpdate = today;
+  saveState();
+}
+
+/* =========================================================
+   토스트 & 모달
+========================================================= */
+function toast(msg, type = 'success') {
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity 0.3s'; }, 2400);
+  setTimeout(() => el.remove(), 2800);
+}
+
+function passwordModal(callback) {
+  const modal = document.createElement('div');
+  modal.className = 'modal';
+  modal.innerHTML = `
+    <div class="modal-content">
+      <h3>🔒 부모님 비밀번호</h3>
+      <p>관리 기능을 사용하려면 비밀번호를 입력하세요.</p>
+      <input type="password" class="modal-input" id="pw-input" placeholder="비밀번호" autofocus>
+      <div class="modal-buttons">
+        <button class="cancel" id="pw-cancel">취소</button>
+        <button class="confirm" id="pw-confirm">확인</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  const input = modal.querySelector('#pw-input');
+  input.focus();
+  const close = () => modal.remove();
+  modal.querySelector('#pw-cancel').onclick = close;
+  modal.querySelector('#pw-confirm').onclick = () => {
+    if (input.value === state.adminPassword) { close(); callback(); }
+    else { toast('비밀번호가 틀렸습니다', 'error'); input.value = ''; input.focus(); }
+  };
+  input.onkeypress = (e) => { if (e.key === 'Enter') modal.querySelector('#pw-confirm').click(); };
+  modal.onclick = (e) => { if (e.target === modal) close(); };
+}
+
+function confirmModal(title, msg, callback) {
+  const modal = document.createElement('div');
+  modal.className = 'modal';
+  modal.innerHTML = `
+    <div class="modal-content">
+      <h3>${title}</h3>
+      <p>${msg}</p>
+      <div class="modal-buttons">
+        <button class="cancel">취소</button>
+        <button class="confirm">확인</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  modal.querySelector('.cancel').onclick = () => modal.remove();
+  modal.querySelector('.confirm').onclick = () => { modal.remove(); callback(); };
+  modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+}
+
+/* =========================================================
+   액션들
+========================================================= */
+function addReward(kidId, rewardId) {
+  const r = REWARDS.find(x => x.id === rewardId);
+  if (!r) return;
+  addTx(kidId, 'reward', r.amount, r.name);
+  saveState();
+  render();
+  toast(`${getKid(kidId).name}이(가) ${fmt(r.amount)}원 받았어요! 🎉`);
+}
+
+function undoLastReward(kidId) {
+  const last = state.transactions.find(t => t.kidId === kidId && t.type === 'reward');
+  if (!last) { toast('취소할 보상이 없어요', 'error'); return; }
+  const kid = getKid(kidId);
+  if (kid.balance < last.amount) { toast('잔액이 모자라서 취소할 수 없어요', 'error'); return; }
+  kid.balance -= last.amount;
+  state.transactions = state.transactions.filter(t => t.id !== last.id);
+  saveState();
+  render();
+  toast(`마지막 보상 취소됨`);
+}
+
+function buyItem(kidId, categoryKey, itemId) {
+  const cat = SHOP[categoryKey];
+  const item = cat.items.find(x => x.id === itemId);
+  if (!item) return;
+  const kid = getKid(kidId);
+  if (kid.balance < item.price) { toast('잔액이 부족해요', 'error'); return; }
+
+  // 잔액 차감
+  addTx(kidId, 'purchase', -item.price, `${item.name} 구매`);
+  // 쿠폰 발행
+  const coupon = {
+    id: uid(),
+    kidId,
+    itemId,
+    category: categoryKey,
+    name: item.name,
+    emoji: item.emoji,
+    price: item.price,
+    ts: now(),
+    used: false
+  };
+  state.coupons.unshift(coupon);
+  saveState();
+  render();
+  toast(`${item.name} 쿠폰이 발행됐어요! 🎟️`);
+}
+
+function useCoupon(couponId) {
+  const c = state.coupons.find(x => x.id === couponId);
+  if (!c || c.used) return;
+  c.used = true;
+  c.usedAt = now();
+  saveState();
+  render();
+  toast(`${c.name} 쿠폰 사용됨 ✅`);
+}
+
+function deleteCoupon(couponId) {
+  confirmModal('쿠폰 삭제', '이 쿠폰을 정말 삭제할까요? (환불되지 않아요)', () => {
+    state.coupons = state.coupons.filter(c => c.id !== couponId);
+    saveState();
+    render();
+    toast('쿠폰이 삭제됐어요');
+  });
+}
+
+function buyStock(kidId, ticker, shares) {
+  shares = parseInt(shares);
+  if (!shares || shares < 1) return;
+  const stock = state.stocks[ticker];
+  const cost = stock.price * shares;
+  const kid = getKid(kidId);
+  if (kid.balance < cost) { toast('잔액이 부족해요', 'error'); return; }
+  addTx(kidId, 'stock_buy', -cost, `${stock.name} ${shares}주 매수 @${fmt(stock.price)}원`);
+  setHeld(kidId, ticker, getHeld(kidId, ticker) + shares);
+  saveState();
+  render();
+  toast(`${stock.name} ${shares}주 매수 완료 📈`);
+}
+
+function sellStock(kidId, ticker, shares) {
+  shares = parseInt(shares);
+  if (!shares || shares < 1) return;
+  const held = getHeld(kidId, ticker);
+  if (held < shares) { toast('보유 주식이 부족해요', 'error'); return; }
+  const stock = state.stocks[ticker];
+  const proceeds = stock.price * shares;
+  addTx(kidId, 'stock_sell', proceeds, `${stock.name} ${shares}주 매도 @${fmt(stock.price)}원`);
+  setHeld(kidId, ticker, held - shares);
+  saveState();
+  render();
+  toast(`${stock.name} ${shares}주 매도 완료 💰`);
+}
+
+function deposit(kidId, amount, termKey) {
+  amount = parseInt(amount);
+  if (!amount || amount < 100) { toast('100원 이상 예금해주세요', 'error'); return; }
+  const kid = getKid(kidId);
+  if (kid.balance < amount) { toast('잔액이 부족해요', 'error'); return; }
+  const term = DEPOSIT_TERMS.find(t => t.key === termKey);
+  addTx(kidId, 'deposit_in', -amount, `${term.label} 예금 가입 (연 ${(term.rate*100).toFixed(1)}%)`);
+  state.deposits.push({
+    id: uid(),
+    kidId,
+    amount,
+    startTs: now(),
+    termDays: term.days,
+    rate: term.rate
+  });
+  saveState();
+  render();
+  toast(`${fmt(amount)}원 예금 가입 완료 🏦`);
+}
+
+function withdrawDeposit(depositId, force = false) {
+  const d = state.deposits.find(x => x.id === depositId);
+  if (!d) return;
+  const mature = isDepositMature(d);
+  if (!mature && !force) {
+    confirmModal('중도 해지', '아직 만기 전이에요. 중도 해지하면 이자가 절반만 붙어요. 계속할까요?', () => {
+      withdrawDeposit(depositId, true);
+    });
+    return;
+  }
+  const currentValue = calcDepositCurrentValue(d);
+  const interest = currentValue - d.amount;
+  const finalAmount = mature ? currentValue : d.amount + interest * 0.5;
+  d.withdrawnAt = now();
+  addTx(d.kidId, 'deposit_out', Math.round(finalAmount), mature ? `예금 만기 해지 (+이자 ${fmt(finalAmount - d.amount)}원)` : `예금 중도 해지`);
+  saveState();
+  render();
+  toast(mature ? `만기 해지! ${fmt(finalAmount)}원 입금됨 🎊` : `중도 해지됨`);
+}
+
+/* =========================================================
+   뷰 렌더링
+========================================================= */
+function render() {
+  if (!initialLoadDone) return; // Firebase 초기 로드 전에는 렌더 생략
+  updateStockPricesIfNeeded();
+  document.querySelectorAll('.tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.view === currentView);
+  });
+  const view = document.getElementById('view');
+  if      (currentView === 'home')   view.innerHTML = renderHome();
+  else if (currentView === 'assets') view.innerHTML = renderAssets();
+  else if (currentView === 'shop')   view.innerHTML = renderShop();
+  else if (currentView === 'stock')  view.innerHTML = renderStock();
+  else if (currentView === 'bank')   view.innerHTML = renderBank();
+  attachHandlers();
+}
+
+/* ----- 홈 ----- */
+function renderHome() {
+  // 카테고리별로 그룹
+  const cats = [...new Set(REWARDS.map(r => r.cat))];
+  return `
+    <div class="kids-grid">
+      ${state.kids.map((kid, i) => {
+        const activeCat = rewardCat[kid.id] || cats[0];
+        return `
+        <div class="card kid-card ${i === 0 ? 'pink' : 'mint'}">
+          <div class="kid-name">${kid.name} 👧</div>
+          <div class="balance-big">현재 잔액</div>
+          <div class="balance-amount">${fmt(kid.balance)}<span class="unit">원</span></div>
+
+          <div class="reward-cat-tabs">
+            ${cats.map(c => `
+              <button class="reward-cat-btn ${c === activeCat ? 'active' : ''}" data-action="reward-cat" data-kid="${kid.id}" data-cat="${c}">${c}</button>
+            `).join('')}
+          </div>
+
+          <div class="reward-grid">
+            ${REWARDS.filter(r => r.cat === activeCat).map(r => `
+              <button class="reward-btn" data-action="reward" data-kid="${kid.id}" data-reward="${r.id}">
+                <span>${r.emoji} ${r.name}</span>
+                <span class="amount">+${fmt(r.amount)}</span>
+              </button>
+            `).join('')}
+          </div>
+          <button class="undo-btn" data-action="undo" data-kid="${kid.id}">
+            ↩️ ${kid.name} 마지막 보상 취소
+          </button>
+        </div>
+      `;}).join('')}
+    </div>
+
+    ${renderCouponsSection()}
+  `;
+}
+
+function renderCouponsSection() {
+  const active = state.coupons.filter(c => !c.used);
+  const used = state.coupons.filter(c => c.used);
+  if (active.length === 0 && used.length === 0) return '';
+  return `
+    <div class="card" style="margin-top:16px;">
+      <h2>🎟️ 내 쿠폰함</h2>
+      ${active.length === 0 ? '<p class="empty">아직 쿠폰이 없어요. 상점에서 물건을 사면 쿠폰이 나와요!</p>' : ''}
+      <div class="coupon-grid">
+        ${active.map(c => `
+          <div class="coupon">
+            <div class="emoji">${c.emoji}</div>
+            <div class="coupon-name">${c.name}</div>
+            <div class="coupon-owner">${getKid(c.kidId)?.name || '?'}의 쿠폰</div>
+            <span class="coupon-price">${fmt(c.price)}원</span>
+            <div class="coupon-date">발행: ${new Date(c.ts).toLocaleDateString('ko-KR')}</div>
+            <div class="coupon-actions">
+              <button class="use-btn" data-action="use-coupon" data-id="${c.id}">사용</button>
+              <button class="del-btn" data-action="del-coupon" data-id="${c.id}">삭제</button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+      ${used.length > 0 ? `
+        <h3 style="margin-top:24px;">사용 완료 (${used.length})</h3>
+        <div class="coupon-grid">
+          ${used.slice(0, 6).map(c => `
+            <div class="coupon used">
+              <span class="used-stamp">USED</span>
+              <div class="emoji">${c.emoji}</div>
+              <div class="coupon-name">${c.name}</div>
+              <div class="coupon-owner">${getKid(c.kidId)?.name || '?'}</div>
+              <div class="coupon-date">사용: ${c.usedAt ? new Date(c.usedAt).toLocaleDateString('ko-KR') : '-'}</div>
+            </div>
+          `).join('')}
+        </div>
+      ` : ''}
+    </div>
+  `;
+}
+
+/* ----- 자산 ----- */
+function renderAssets() {
+  return state.kids.map(kid => {
+    const cash = kid.balance;
+    const stock = calcStockValue(kid.id);
+    const savings = calcDepositValue(kid.id);
+    const total = cash + stock + savings;
+    const txs = state.transactions.filter(t => t.kidId === kid.id).slice(0, 12);
+    return `
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
+          <h2 style="margin:0;">${kid.name}의 자산</h2>
+          ${isAdmin ? `<button class="admin-btn" data-action="edit-balance" data-kid="${kid.id}">✏️ 잔액 수정</button>` : ''}
+        </div>
+        <div class="asset-row">
+          <div class="asset-box cash">
+            <div class="asset-label">💵 현금</div>
+            <div class="asset-value">${fmt(cash)}<span class="unit">원</span></div>
+          </div>
+          <div class="asset-box stock">
+            <div class="asset-label">📈 주식 평가액</div>
+            <div class="asset-value">${fmt(stock)}<span class="unit">원</span></div>
+          </div>
+          <div class="asset-box savings">
+            <div class="asset-label">🏦 예금 (원+이자)</div>
+            <div class="asset-value">${fmt(savings)}<span class="unit">원</span></div>
+          </div>
+          <div class="asset-box total">
+            <div class="asset-label">🏆 총 자산</div>
+            <div class="asset-value">${fmt(total)}<span class="unit">원</span></div>
+          </div>
+        </div>
+
+        <h3 style="margin-top:8px;">📋 최근 거래</h3>
+        <div class="tx-list">
+          ${txs.length === 0 ? '<div class="empty">아직 거래가 없어요</div>' :
+            txs.map(t => {
+              const d = new Date(t.ts);
+              const plus = t.amount >= 0;
+              return `
+                <div class="tx-item">
+                  <div>
+                    <div class="tx-desc">${t.desc}</div>
+                    <div class="tx-time">${d.toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})}</div>
+                  </div>
+                  <div class="tx-amount ${plus ? 'plus' : 'minus'}">${plus ? '+' : ''}${fmt(t.amount)}원</div>
+                </div>
+              `;
+            }).join('')}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+/* ----- 상점 ----- */
+function renderShop() {
+  if (!selectedChild) {
+    return `
+      <div class="card">
+        <h2>🛒 누가 쇼핑할까요?</h2>
+        <p style="color:var(--ink-soft);margin-bottom:16px;font-size:14px;">상품을 사면 쿠폰이 발행돼요. 실제로 사용할 때 홈 화면에서 쿠폰을 꺼내 쓰면 됩니다.</p>
+        <div class="child-selector">
+          ${state.kids.map(k => `
+            <button data-action="select-kid" data-kid="${k.id}">
+              ${k.name}<br>
+              <span style="font-size:16px;color:var(--ink-soft);">${fmt(k.balance)}원</span>
+            </button>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+  const kid = getKid(selectedChild);
+  const cat = SHOP[shopCategory];
+  return `
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+        <div>
+          <h2 style="margin:0;">${kid.name}의 쇼핑</h2>
+          <div style="color:var(--primary);font-weight:700;font-size:18px;">💵 ${fmt(kid.balance)}원</div>
+        </div>
+        <button class="admin-btn" data-action="clear-selected">← 다른 사람</button>
+      </div>
+
+      <div class="shop-category-tabs">
+        ${Object.keys(SHOP).map(k => `
+          <button class="shop-cat-btn ${k === shopCategory ? 'active' : ''}" data-action="cat" data-cat="${k}">${SHOP[k].label}</button>
+        `).join('')}
+      </div>
+
+      <div class="shop-grid">
+        ${cat.items.map(item => {
+          const can = kid.balance >= item.price;
+          return `
+            <div class="shop-item ${can ? 'affordable' : ''}">
+              <div class="shop-emoji">${item.emoji}</div>
+              <div class="shop-name">${item.name}</div>
+              <div class="shop-price">${fmt(item.price)}원</div>
+              <button class="shop-buy" data-action="buy" data-cat="${shopCategory}" data-item="${item.id}" ${can ? '' : 'disabled'}>
+                ${can ? '🎟️ 쿠폰 받기' : '잔액 부족'}
+              </button>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    </div>
+  `;
+}
+
+/* ----- 주식 ----- */
+function renderStock() {
+  const tickers = Object.keys(state.stocks);
+  return `
+    <div class="card">
+      <h2>📈 국내 주식 투자</h2>
+      <div class="market-info">
+        <div>
+          <span class="label">마지막 시세 업데이트</span><br>
+          <span class="value">${state.lastStockUpdate || '오늘'} · 매일 자동 변동</span>
+        </div>
+        <div style="font-size:12px;color:var(--ink-soft);">* 실제 시세가 아닌 교육용 가상 시세입니다</div>
+      </div>
+
+      ${state.kids.map(kid => {
+        const stockValue = calcStockValue(kid.id);
+        return `
+          <div style="margin-bottom:24px;">
+            <h3>${kid.name} · 잔액 ${fmt(kid.balance)}원 · 주식평가액 ${fmt(stockValue)}원</h3>
+            <div class="stock-list">
+              ${tickers.map(t => {
+                const s = state.stocks[t];
+                const held = getHeld(kid.id, t);
+                const diff = s.price - s.base;
+                const diffPct = ((diff / s.base) * 100).toFixed(2);
+                const up = diff >= 0;
+                const maxBuy = Math.floor(kid.balance / s.price);
+                return `
+                  <div class="stock-row">
+                    <div class="stock-info-col">
+                      <span class="stock-ticker">${s.ticker}</span>
+                      <span class="stock-name">${s.name}</span>
+                    </div>
+                    <div class="stock-price-col">
+                      <div class="stock-price">${fmt(s.price)}원</div>
+                      <div class="stock-change ${up ? 'up' : 'down'}">${up ? '▲' : '▼'} ${Math.abs(diff).toLocaleString()}원 (${up ? '+' : ''}${diffPct}%)</div>
+                    </div>
+                    <div class="stock-held">
+                      보유<br><strong>${held}주</strong>
+                    </div>
+                    <div class="stock-actions">
+                      <input type="number" min="1" max="${maxBuy}" value="1" class="form-input" id="buy-${kid.id}-${t}" style="width:60px;padding:6px;">
+                      <button class="stock-btn buy" data-action="stock-buy" data-kid="${kid.id}" data-ticker="${t}" ${maxBuy < 1 ? 'disabled' : ''}>매수</button>
+                      <input type="number" min="1" max="${held}" value="1" class="form-input" id="sell-${kid.id}-${t}" style="width:60px;padding:6px;">
+                      <button class="stock-btn sell" data-action="stock-sell" data-kid="${kid.id}" data-ticker="${t}" ${held < 1 ? 'disabled' : ''}>매도</button>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+}
+
+/* ----- 예금 ----- */
+function renderBank() {
+  return `
+    <div class="card">
+      <h2>🏦 예금 · 이자 받기</h2>
+      <p style="color:var(--ink-soft);margin-bottom:16px;font-size:14px;">예금하면 시간이 지날수록 이자가 붙어요. 오래 맡길수록 이자율이 높아져요!</p>
+
+      <div class="deposit-options">
+        ${DEPOSIT_TERMS.map(t => `
+          <div class="deposit-option">
+            <div class="period">${t.label}</div>
+            <div class="rate">연 ${(t.rate*100).toFixed(1)}%</div>
+            <div class="desc">${t.days === 0 ? '언제든 출금 가능' : `${t.days}일 후 만기`}</div>
+          </div>
+        `).join('')}
+      </div>
+
+      ${state.kids.map(kid => {
+        const active = calcActiveDeposits(kid.id);
+        const depValue = calcDepositValue(kid.id);
+        return `
+          <div style="margin-top:20px;">
+            <h3>${kid.name}의 예금 · 잔액 ${fmt(kid.balance)}원 · 예금액 ${fmt(depValue)}원</h3>
+
+            <div class="deposit-form">
+              <input type="number" class="form-input" id="dep-amount-${kid.id}" placeholder="예금할 금액 (원)" min="100">
+              <select class="form-select" id="dep-term-${kid.id}">
+                ${DEPOSIT_TERMS.map(t => `<option value="${t.key}">${t.label} (연 ${(t.rate*100).toFixed(1)}%)</option>`).join('')}
+              </select>
+              <button class="admin-btn" style="background:var(--gold);" data-action="deposit" data-kid="${kid.id}">예금하기</button>
+            </div>
+
+            ${active.length === 0 ? '<div class="empty">진행중인 예금이 없어요</div>' : `
+              <div class="deposit-list">
+                ${active.map(d => {
+                  const term = DEPOSIT_TERMS.find(t => t.key === (DEPOSIT_TERMS.find(x => x.days === d.termDays && x.rate === d.rate)?.key)) || { label: `${d.termDays}일` };
+                  const mature = isDepositMature(d);
+                  const cur = calcDepositCurrentValue(d);
+                  const interest = cur - d.amount;
+                  const start = new Date(d.startTs);
+                  const matureDate = new Date(start.getTime() + d.termDays * 24*60*60*1000);
+                  const totalMs = d.termDays * 24*60*60*1000;
+                  const elapsedMs = Math.max(0, Date.now() - start.getTime());
+                  const progress = d.termDays === 0 ? 100 : Math.min(100, (elapsedMs / totalMs) * 100);
+                  return `
+                    <div class="deposit-item">
+                      <div class="deposit-head">
+                        <div>
+                          <div class="deposit-amount">${fmt(d.amount)}원 · ${term.label} · 연 ${(d.rate*100).toFixed(1)}%</div>
+                          <div style="font-size:12px;color:var(--ink-soft);">가입일: ${start.toLocaleDateString('ko-KR')}</div>
+                        </div>
+                        <div style="text-align:right;">
+                          <div style="font-size:13px;color:var(--ink-soft);">현재 평가액</div>
+                          <div style="font-weight:700;color:var(--gold);">${fmt(cur)}원</div>
+                          <div style="font-size:12px;color:var(--accent);">+${fmt(interest)}원 이자</div>
+                        </div>
+                      </div>
+                      ${d.termDays > 0 ? `
+                        <div class="deposit-progress"><div class="deposit-progress-bar" style="width:${progress}%;"></div></div>
+                        <div class="deposit-meta">
+                          <span>진행 ${progress.toFixed(0)}%</span>
+                          <span>만기: ${matureDate.toLocaleDateString('ko-KR')}</span>
+                        </div>
+                      ` : `<div class="deposit-meta"><span>자유 예금 (언제든 출금)</span></div>`}
+                      <button class="withdraw-btn ${mature ? 'ready' : ''}" data-action="withdraw" data-id="${d.id}">
+                        ${mature ? '✓ 만기 출금' : '중도 해지'}
+                      </button>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            `}
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+}
+
+/* =========================================================
+   이벤트 바인딩
+========================================================= */
+function attachHandlers() {
+  document.querySelectorAll('[data-action]').forEach(el => {
+    el.onclick = () => {
+      const a = el.dataset.action;
+      if (a === 'reward')         addReward(el.dataset.kid, el.dataset.reward);
+      else if (a === 'undo')      undoLastReward(el.dataset.kid);
+      else if (a === 'reward-cat'){ rewardCat[el.dataset.kid] = el.dataset.cat; render(); }
+      else if (a === 'select-kid'){ selectedChild = el.dataset.kid; render(); }
+      else if (a === 'clear-selected'){ selectedChild = null; render(); }
+      else if (a === 'cat')       { shopCategory = el.dataset.cat; render(); }
+      else if (a === 'buy')       buyItem(selectedChild, el.dataset.cat, el.dataset.item);
+      else if (a === 'use-coupon')useCoupon(el.dataset.id);
+      else if (a === 'del-coupon')deleteCoupon(el.dataset.id);
+      else if (a === 'stock-buy') {
+        const q = document.getElementById(`buy-${el.dataset.kid}-${el.dataset.ticker}`).value;
+        buyStock(el.dataset.kid, el.dataset.ticker, q);
+      }
+      else if (a === 'stock-sell') {
+        const q = document.getElementById(`sell-${el.dataset.kid}-${el.dataset.ticker}`).value;
+        sellStock(el.dataset.kid, el.dataset.ticker, q);
+      }
+      else if (a === 'deposit') {
+        const amount = document.getElementById(`dep-amount-${el.dataset.kid}`).value;
+        const term = document.getElementById(`dep-term-${el.dataset.kid}`).value;
+        deposit(el.dataset.kid, amount, term);
+      }
+      else if (a === 'withdraw') withdrawDeposit(el.dataset.id);
+      else if (a === 'edit-balance') editBalance(el.dataset.kid);
+    };
+  });
+}
+
+function editBalance(kidId) {
+  const kid = getKid(kidId);
+  const modal = document.createElement('div');
+  modal.className = 'modal';
+  modal.innerHTML = `
+    <div class="modal-content">
+      <h3>✏️ ${kid.name} 잔액 수정</h3>
+      <p>현재 잔액: ${fmt(kid.balance)}원</p>
+      <input type="number" class="modal-input" id="new-balance" value="${kid.balance}">
+      <div class="modal-buttons">
+        <button class="cancel">취소</button>
+        <button class="confirm">저장</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  modal.querySelector('.cancel').onclick = () => modal.remove();
+  modal.querySelector('.confirm').onclick = () => {
+    const v = parseInt(modal.querySelector('#new-balance').value);
+    if (isNaN(v)) { toast('숫자를 입력하세요', 'error'); return; }
+    const diff = v - kid.balance;
+    kid.balance = v;
+    state.transactions.unshift({ id: uid(), kidId, type: 'adjust', amount: diff, desc: '관리자 조정', ts: now() });
+    saveState();
+    modal.remove();
+    render();
+    toast('잔액이 수정됐어요');
+  };
+}
+
+/* =========================================================
+   초기화
+========================================================= */
+// 탭 클릭
+document.querySelectorAll('.tab').forEach(t => {
+  t.onclick = () => { currentView = t.dataset.view; selectedChild = null; render(); };
+});
+
+// 부모님 모드 토글
+document.getElementById('admin-toggle').onclick = () => {
+  if (isAdmin) {
+    isAdmin = false;
+    document.getElementById('admin-toggle').classList.remove('on');
+    document.getElementById('admin-toggle').textContent = '🔒 부모님 모드';
+    toast('부모님 모드 해제됨');
+    render();
+  } else {
+    passwordModal(() => {
+      isAdmin = true;
+      document.getElementById('admin-toggle').classList.add('on');
+      document.getElementById('admin-toggle').textContent = '🔓 부모님 모드 ON';
+      toast('부모님 모드 활성화됨 ✓');
+      render();
+    });
+  }
+};
+
+// Firebase가 준비되면 연결, 이미 준비되었으면 바로 호출
+if (window.__firebase) {
+  initFirebase();
+} else {
+  window.addEventListener('firebase-ready', initFirebase, { once: true });
+  // Firebase가 10초 내로 로드 안 되면 로컬 모드로 폴백
+  setTimeout(() => {
+    if (!initialLoadDone) {
+      console.warn('Firebase 로드 타임아웃 - 로컬 모드');
+      initFirebase();
+    }
+  }, 10000);
+}
+</script>
+</body>
+</html>
