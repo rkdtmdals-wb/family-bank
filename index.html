@@ -278,6 +278,15 @@ body {
 }
 .reward-btn:hover:not(:disabled) { transform: translate(-1px,-1px); box-shadow: 4px 4px 0 var(--ink); }
 .reward-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.reward-btn.claimed {
+  background: #c8d4cc;
+  color: #5a6b60;
+  box-shadow: none;
+  opacity: 0.85;
+  position: relative;
+}
+.reward-btn.claimed:hover { transform: none; box-shadow: none; }
+.reward-btn.claimed .amount { color: var(--accent); font-weight: 700; }
 .reward-btn .amount { font-family: 'IBM Plex Sans KR', sans-serif; font-weight: 700; font-size: 16px; }
 
 .undo-btn {
@@ -1176,10 +1185,43 @@ function confirmModal(title, msg, callback) {
 /* =========================================================
    액션들
 ========================================================= */
+// 오늘(로컬 시간 자정 기준) 해당 보상을 이미 받았는지 체크
+function getTodayLocalKey() {
+  // 로컬 시간 기준 YYYY-MM-DD (UTC 변환 문제 방지)
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+function isRewardClaimedToday(kidId, rewardId) {
+  const today = getTodayLocalKey();
+  // 부모님 모드일 때도 일단 체크는 하되, 부모가 재지급하고 싶으면 별도 옵션으로
+  return state.transactions.some(t => {
+    if (t.kidId !== kidId || t.type !== 'reward') return false;
+    if (t.rewardId !== rewardId) return false;
+    // 로컬 타임존 기준으로 오늘 날짜 매칭
+    const d = new Date(t.ts);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}` === today;
+  });
+}
+
 function addReward(kidId, rewardId) {
   const r = REWARDS.find(x => x.id === rewardId);
   if (!r) return;
-  addTx(kidId, 'reward', r.amount, r.name);
+  if (isRewardClaimedToday(kidId, rewardId)) {
+    toast(`오늘은 이미 받았어요! 내일 다시 도전해요 🌙`, 'error');
+    return;
+  }
+  // 트랜잭션에 rewardId 저장 (중복 체크용)
+  const tx = { id: uid(), kidId, type: 'reward', amount: r.amount, desc: r.name, rewardId, ts: now() };
+  state.transactions.unshift(tx);
+  const kid = getKid(kidId);
+  if (kid) kid.balance += r.amount;
   saveState();
   render();
   toast(`${getKid(kidId).name}이(가) ${fmt(r.amount)}원 받았어요! 🎉`);
@@ -1352,11 +1394,11 @@ function renderHome() {
   return `
     ${!isAdmin ? `
       <div class="info-banner">
-        🔒 보상 버튼을 누르면 부모님 비밀번호가 필요해요! 부모님 확인 후에만 돈이 들어와요.
+        🔒 보상 버튼을 누르면 부모님 비밀번호가 필요해요! · ⏰ 각 보상은 <strong>하루에 한 번씩만</strong> 받을 수 있어요 (자정에 초기화)
       </div>
     ` : `
       <div class="info-banner admin">
-        🔓 부모님 모드: 보상 버튼을 바로 누를 수 있어요.
+        🔓 부모님 모드 · ⏰ 각 보상은 하루 한 번 (자정 초기화)
       </div>
     `}
     <div class="kids-grid">
@@ -1375,12 +1417,14 @@ function renderHome() {
           </div>
 
           <div class="reward-grid">
-            ${REWARDS.filter(r => r.cat === activeCat).map(r => `
-              <button class="reward-btn" data-action="reward" data-kid="${kid.id}" data-reward="${r.id}">
+            ${REWARDS.filter(r => r.cat === activeCat).map(r => {
+              const claimed = isRewardClaimedToday(kid.id, r.id);
+              return `
+              <button class="reward-btn ${claimed ? 'claimed' : ''}" data-action="reward" data-kid="${kid.id}" data-reward="${r.id}" ${claimed ? 'disabled' : ''}>
                 <span>${r.emoji} ${r.name}</span>
-                <span class="amount">+${fmt(r.amount)}</span>
+                <span class="amount">${claimed ? '✓ 완료' : '+' + fmt(r.amount)}</span>
               </button>
-            `).join('')}
+            `;}).join('')}
           </div>
           <button class="undo-btn" data-action="undo" data-kid="${kid.id}">
             ↩️ ${kid.name} 마지막 보상 취소
@@ -1814,6 +1858,17 @@ if (window.__firebase) {
     }
   }, 10000);
 }
+
+// 자정 넘어가면 자동으로 재렌더링 (보상 버튼 다시 활성화)
+let lastCheckedDate = getTodayLocalKey();
+setInterval(() => {
+  const today = getTodayLocalKey();
+  if (today !== lastCheckedDate) {
+    lastCheckedDate = today;
+    console.log('날짜 바뀜 → 재렌더링');
+    render();
+  }
+}, 60000); // 1분마다 체크
 </script>
 </body>
 </html>
