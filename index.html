@@ -120,8 +120,8 @@ body {
 /* ===== 탭 네비게이션 ===== */
 .tabs {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 8px;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
   background: var(--surface);
   border: var(--border);
   border-radius: var(--radius);
@@ -203,8 +203,9 @@ body {
 }
 @media (max-width: 720px) {
   .kids-grid { grid-template-columns: 1fr; }
-  .tabs { grid-template-columns: repeat(3, 1fr); }
-  .tabs .tab:nth-child(4), .tabs .tab:nth-child(5) { grid-column: span 1; }
+  .tabs { grid-template-columns: repeat(4, 1fr); }
+  .tabs .tab { font-size: 12px; padding: 10px 4px; }
+  .tabs .tab .emoji { font-size: 18px; }
   .header h1 { font-size: 30px; }
   .child-selector button { font-size: 20px; }
 }
@@ -395,6 +396,31 @@ body {
 .shop-item.custom-item {
   background: linear-gradient(135deg, #FFF4D6 0%, #FFE8B0 100%);
   border: 3px dashed var(--gold);
+}
+.shop-item.lucky-item {
+  background: linear-gradient(135deg, #FFE0E8 0%, #FFD0D8 100%);
+  border: 3px dashed var(--primary);
+}
+.shop-item.lucky-item .shop-emoji {
+  animation: bounce 1.5s infinite;
+}
+.lucky-modal {
+  text-align: center;
+}
+.lucky-result {
+  padding: 24px 16px;
+  margin: 16px 0;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #FFF4D6, #FFE8B0);
+  border: 3px dashed var(--gold);
+  animation: pop 0.5s ease;
+}
+.lucky-result.win { background: linear-gradient(135deg, #D7EFDF, #B0E5C0); border-color: var(--accent); }
+.lucky-result.lose { background: linear-gradient(135deg, #FFE0E0, #FFD0D0); border-color: var(--danger); }
+@keyframes pop {
+  0% { transform: scale(0.5); opacity: 0; }
+  60% { transform: scale(1.1); }
+  100% { transform: scale(1); opacity: 1; }
 }
 .custom-hint {
   font-size: 11px;
@@ -717,6 +743,248 @@ body {
   border-color: var(--accent);
 }
 
+/* 🎰 럭키박스 */
+.lucky-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+@media (max-width: 720px) {
+  .lucky-grid { grid-template-columns: 1fr; }
+}
+.lucky-box {
+  padding: 18px;
+  border: var(--border-thin);
+  border-radius: 14px;
+  text-align: center;
+  background: linear-gradient(135deg, #FFF4D6, #FFE8B0);
+}
+.lucky-box.ready {
+  border: 3px dashed var(--gold);
+  animation: bounce 1.5s infinite;
+}
+.lucky-box.wait { opacity: 0.6; background: var(--bg); }
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+.lucky-emoji { font-size: 42px; margin-bottom: 6px; }
+.lucky-name { font-weight: 700; font-size: 16px; margin-bottom: 8px; }
+.lucky-btn {
+  padding: 12px 18px;
+  background: var(--gold);
+  color: var(--ink);
+  border: var(--border-thin);
+  border-radius: 10px;
+  font-family: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 14px;
+  width: 100%;
+  box-shadow: var(--shadow-sm);
+}
+.lucky-btn:hover { transform: translate(-1px,-1px); box-shadow: 4px 4px 0 var(--ink); }
+.lucky-wait { font-size: 12px; color: var(--ink-soft); }
+
+/* 💌 메시지 */
+.msg-form {
+  display: grid;
+  grid-template-columns: auto 2fr 1fr auto;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+@media (max-width: 720px) {
+  .msg-form { grid-template-columns: 1fr; }
+}
+.msg-list { display: grid; gap: 10px; }
+.msg-item {
+  padding: 12px;
+  border: var(--border-thin);
+  border-radius: 10px;
+  background: var(--primary-soft);
+}
+.msg-item.read { opacity: 0.7; background: var(--bg); }
+.msg-head { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 6px; }
+.msg-to { font-weight: 700; color: var(--primary); }
+.msg-time { color: var(--ink-soft); }
+.msg-text { font-size: 14px; font-weight: 500; }
+.msg-amount { margin-top: 6px; font-size: 13px; font-weight: 700; color: var(--accent); }
+
+/* 💱 송금 */
+.transfer-form {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr 1fr auto;
+  gap: 8px;
+}
+@media (max-width: 720px) {
+  .transfer-form { grid-template-columns: 1fr; }
+  .transfer-form span { display: none; }
+}
+
+/* 🎯 목표 */
+.goal-form {
+  display: grid;
+  grid-template-columns: 2fr 1fr auto;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+@media (max-width: 720px) {
+  .goal-form { grid-template-columns: 1fr 1fr; }
+  .goal-form button { grid-column: 1 / -1; }
+}
+.goal-list { display: grid; gap: 12px; }
+.goal-card {
+  padding: 16px;
+  border: var(--border-thin);
+  border-radius: 14px;
+  background: linear-gradient(135deg, #FFF4D6, #FFFFFF);
+}
+.goal-card.achieved {
+  background: linear-gradient(135deg, #D7EFDF, #FFFFFF);
+  border-color: var(--accent);
+}
+.goal-head { display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px; }
+.goal-name { font-weight: 700; font-size: 16px; }
+.goal-target { font-size: 12px; color: var(--ink-soft); margin-top: 2px; }
+.goal-bar {
+  height: 14px;
+  background: var(--surface);
+  border: 1px solid var(--ink);
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 8px 0;
+}
+.goal-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold), var(--primary));
+  transition: width 0.5s ease;
+}
+.goal-meta { display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; }
+.del-mini-btn {
+  background: var(--bg-2);
+  border: var(--border-thin);
+  border-radius: 6px;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: inherit;
+}
+.del-mini-btn:hover { background: var(--danger); color: white; }
+
+/* 📊 통계 */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+@media (max-width: 720px) {
+  .stat-grid { grid-template-columns: 1fr 1fr; }
+}
+.stat-box {
+  padding: 12px;
+  background: var(--surface);
+  border: var(--border-thin);
+  border-radius: 10px;
+  text-align: center;
+}
+.stat-label { font-size: 11px; color: var(--ink-soft); margin-bottom: 4px; }
+.stat-value { font-size: 18px; font-weight: 700; color: var(--primary); }
+
+.cat-bars { display: grid; gap: 6px; }
+.cat-bar-row { display: grid; grid-template-columns: 70px 1fr 40px; align-items: center; gap: 8px; font-size: 13px; }
+.cat-bar-label { font-weight: 600; }
+.cat-bar { height: 12px; background: var(--bg); border: 1px solid var(--ink); border-radius: 6px; overflow: hidden; }
+.cat-bar-fill { height: 100%; background: var(--accent); }
+.cat-bar-count { text-align: right; font-weight: 700; }
+
+.top-list, .streak-list { display: grid; gap: 6px; }
+.top-item, .streak-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  background: var(--surface);
+  border: var(--border-thin);
+  border-radius: 8px;
+  font-size: 13px;
+}
+.top-rank { font-weight: 700; color: var(--gold); margin-right: 6px; }
+.top-name { flex: 1; }
+.top-count { font-weight: 700; color: var(--primary); }
+.streak-days { font-weight: 700; color: var(--danger); }
+
+/* 자동 저축 */
+.autosave-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.autosave-list { display: grid; gap: 6px; }
+.autosave-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  background: var(--surface);
+  border: var(--border-thin);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* ⚠️ 벌금 */
+.penalty-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.penalty-btn {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 14px;
+  background: var(--danger);
+  color: var(--surface);
+  border: var(--border-thin);
+  border-color: var(--ink);
+  border-radius: 10px;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 13px;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.15s;
+}
+.penalty-btn:hover { transform: translate(-1px,-1px); box-shadow: 4px 4px 0 var(--ink); }
+.penalty-amount { font-weight: 700; font-size: 14px; }
+.penalty-custom {
+  display: grid;
+  grid-template-columns: 2fr 1fr auto;
+  gap: 8px;
+  padding: 10px;
+  background: var(--surface);
+  border: var(--border-thin);
+  border-radius: 10px;
+}
+@media (max-width: 720px) {
+  .penalty-custom { grid-template-columns: 1fr; }
+}
+.penalty-btn-custom {
+  padding: 10px 14px;
+  background: var(--danger);
+  color: var(--surface);
+  border: var(--border-thin);
+  border-radius: 8px;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 13px;
+}
+
 /* Firebase 연결 상태 */
 .sync-indicator {
   display: inline-flex;
@@ -770,9 +1038,11 @@ body {
   <nav class="tabs">
     <button class="tab active" data-view="home"><span class="emoji">🏠</span>홈</button>
     <button class="tab" data-view="assets"><span class="emoji">💰</span>내자산</button>
+    <button class="tab" data-view="goals"><span class="emoji">🎯</span>목표</button>
     <button class="tab" data-view="shop"><span class="emoji">🛒</span>상점</button>
     <button class="tab" data-view="stock"><span class="emoji">📈</span>주식</button>
     <button class="tab" data-view="bank"><span class="emoji">🏦</span>예금</button>
+    <button class="tab" data-view="stats"><span class="emoji">📊</span>통계</button>
   </nav>
 
   <div id="view"></div>
@@ -789,10 +1059,14 @@ const DEFAULT_STATE = {
     { id: 'k1', name: '다현', balance: 0, gender: 'girl' },
     { id: 'k2', name: '선우', balance: 0, gender: 'boy' }
   ],
-  transactions: [],    // {id, kidId, type, amount, desc, ts}
+  transactions: [],    // {id, kidId, type, amount, desc, ts, rewardId?}
   coupons: [],         // {id, kidId, itemId, name, emoji, price, ts, used, usedAt}
   holdings: {},        // { kidId: { ticker: shares } }
   deposits: [],        // {id, kidId, amount, startTs, termDays, rate, withdrawnAt}
+  goals: [],           // {id, kidId, name, emoji, target, ts, achieved}
+  autoSavings: [],     // {id, kidId, amount, day, lastRunDate}  매주 OO원 자동 저축
+  messages: [],        // {id, kidId, text, amount, ts, read}  부모님 깜짝 메시지
+  luckyBoxes: {},      // { kidId: { lastClaimDate: 'YYYY-MM-DD', nextDate: 'YYYY-MM-DD' } }
   stocks: {
     '005930': { name: '삼성전자',    ticker: '005930', price: 216500,  base: 216500 },
     '000660': { name: 'SK하이닉스', ticker: '000660', price: 1170000, base: 1170000 },
@@ -813,40 +1087,77 @@ const DEPOSIT_TERMS = [
 ];
 
 const REWARDS = [
-  // 학습
-  { id: 'study',        name: '공부 스스로 열심히',   amount: 2000, emoji: '📚', cat: '학습' },
+  // 📚 학습
+  { id: 'study',        name: '숙제 다 마치고 놀기',  amount: 2000, emoji: '📚', cat: '학습' },
   { id: 'reading',      name: '책 한 권 읽기',        amount: 1500, emoji: '📖', cat: '학습' },
   { id: 'homework',     name: '숙제 끝까지 완료',     amount: 5000, emoji: '✏️', cat: '학습' },
   { id: 'diary',        name: '일기 쓰기',            amount: 500,  emoji: '📓', cat: '학습' },
-  { id: 'test_score',   name: '시험 잘 봤을 때',      amount: 5000, emoji: '💯', cat: '학습' },
+  { id: 'test_score',   name: '시험 100점',           amount: 5000, emoji: '💯', cat: '학습' },
   { id: 'new_learn',    name: '새로운 것 배우기',     amount: 2000, emoji: '🎓', cat: '학습' },
+  { id: 'math_practice',name: '수학 문제집 풀기',     amount: 1500, emoji: '🔢', cat: '학습' },
+  { id: 'english',      name: '영어 숙제 다 하기',    amount: 1500, emoji: '🔤', cat: '학습' },
+  { id: 'school_well',  name: '학교 잘 다녀오기',     amount: 500,  emoji: '🎒', cat: '학습' },
 
-  // 집안일·생활
-  { id: 'clean_room',   name: '방 청소 깔끔하게',     amount: 1000, emoji: '🧹', cat: '생활' },
-  { id: 'chores',       name: '집안일 돕기',          amount: 500,  emoji: '🏠', cat: '생활' },
-  { id: 'dishes',       name: '설거지 돕기',          amount: 800,  emoji: '🍽️', cat: '생활' },
-  { id: 'laundry',      name: '빨래 개기',            amount: 700,  emoji: '👕', cat: '생활' },
-  { id: 'trash',        name: '분리수거 돕기',        amount: 500,  emoji: '♻️', cat: '생활' },
-  { id: 'make_bed',     name: '이불 스스로 정리',     amount: 300,  emoji: '🛏️', cat: '생활' },
-  { id: 'pet_care',     name: '반려동물 돌보기',      amount: 700,  emoji: '🐶', cat: '생활' },
+  // 🏠 집안일
+  { id: 'clean_room',   name: '방 청소 깔끔하게',     amount: 1000, emoji: '🧹', cat: '집안일' },
+  { id: 'chores',       name: '집안일 돕기',          amount: 500,  emoji: '🏠', cat: '집안일' },
+  { id: 'dishes',       name: '설거지 돕기',          amount: 800,  emoji: '🍽️', cat: '집안일' },
+  { id: 'laundry',      name: '빨래 개기',            amount: 700,  emoji: '👕', cat: '집안일' },
+  { id: 'trash',        name: '분리수거 돕기',        amount: 500,  emoji: '♻️', cat: '집안일' },
+  { id: 'make_bed',     name: '이불 스스로 정리',     amount: 300,  emoji: '🛏️', cat: '집안일' },
+  { id: 'pet_care',     name: '반려동물 돌보기',      amount: 700,  emoji: '🐶', cat: '집안일' },
+  { id: 'water_plants', name: '식물 물 주기',         amount: 300,  emoji: '🌱', cat: '집안일' },
+  { id: 'vacuum',       name: '청소기 돌리기',        amount: 800,  emoji: '🧺', cat: '집안일' },
+  { id: 'cook_help',    name: '요리 돕기',            amount: 1000, emoji: '👩‍🍳', cat: '집안일' },
+  { id: 'set_table',    name: '식탁 차리기',          amount: 400,  emoji: '🍴', cat: '집안일' },
+  { id: 'shoe_organize',name: '신발 정리',            amount: 300,  emoji: '👟', cat: '집안일' },
 
-  // 건강·운동
-  { id: 'exercise',     name: '운동하기',             amount: 500,  emoji: '⚽', cat: '건강' },
+  // 💪 건강
+  { id: 'exercise',     name: '운동하기 30분',        amount: 500,  emoji: '⚽', cat: '건강' },
   { id: 'early_sleep',  name: '일찍 잠자기',          amount: 500,  emoji: '😴', cat: '건강' },
   { id: 'eat_well',     name: '반찬 골고루 먹기',     amount: 400,  emoji: '🥗', cat: '건강' },
   { id: 'brush_teeth',  name: '양치 꼼꼼히',          amount: 200,  emoji: '🪥', cat: '건강' },
+  { id: 'shower',       name: '스스로 씻기',          amount: 300,  emoji: '🚿', cat: '건강' },
+  { id: 'water_drink',  name: '물 많이 마시기',       amount: 200,  emoji: '💧', cat: '건강' },
+  { id: 'walk',         name: '산책·걷기',            amount: 500,  emoji: '🚶', cat: '건강' },
+  { id: 'stretch',      name: '스트레칭',             amount: 300,  emoji: '🧘', cat: '건강' },
+  { id: 'fruit',        name: '과일 챙겨 먹기',       amount: 300,  emoji: '🍎', cat: '건강' },
 
-  // 인성·태도
+  // 💝 인성·태도
   { id: 'help_family',  name: '가족 도와주기',        amount: 500,  emoji: '🤝', cat: '태도' },
   { id: 'polite',       name: '인사 잘하기',          amount: 300,  emoji: '🙇', cat: '태도' },
   { id: 'no_fight',     name: '하루종일 안 싸우기',   amount: 1000, emoji: '☮️', cat: '태도' },
-  { id: 'share',        name: '양보·나누기',          amount: 800,  emoji: '💝', cat: '태도' },
-  { id: 'apology',      name: '먼저 사과하기',        amount: 1000, emoji: '🌱', cat: '태도' },
+  { id: 'share',        name: '양보·나누기',          amount: 800,  emoji: '💞', cat: '태도' },
+  { id: 'apology',      name: '먼저 사과하기',        amount: 1000, emoji: '🌟', cat: '태도' },
   { id: 'patience',     name: '참을성 발휘',          amount: 800,  emoji: '🧘', cat: '태도' },
+  { id: 'thanks',       name: '감사 표현',            amount: 300,  emoji: '🙏', cat: '태도' },
+  { id: 'volunteer',    name: '봉사·도움 자원',       amount: 1000, emoji: '🤲', cat: '태도' },
 
-  // 보너스
+  // 🎨 자기계발
+  { id: 'piano',        name: '피아노 연습',          amount: 1500, emoji: '🎹', cat: '자기계발' },
+  { id: 'instrument',   name: '악기 연습',            amount: 1500, emoji: '🎻', cat: '자기계발' },
+  { id: 'draw',         name: '그림 그리기',          amount: 1000, emoji: '🎨', cat: '자기계발' },
+  { id: 'craft',        name: '만들기 작품',          amount: 1500, emoji: '✂️', cat: '자기계발' },
+  { id: 'write_story',  name: '이야기·글 쓰기',       amount: 1500, emoji: '📝', cat: '자기계발' },
+  { id: 'sing',         name: '노래 연습',            amount: 800,  emoji: '🎤', cat: '자기계발' },
+  { id: 'no_phone',     name: '스마트폰 안 보기',     amount: 1500, emoji: '📵', cat: '자기계발' },
+  { id: 'no_tv',        name: 'TV 안 보기',           amount: 1000, emoji: '📺', cat: '자기계발' },
+
+  // 💪 도전
+  { id: 'first_try',    name: '처음 도전한 일',       amount: 2000, emoji: '🚀', cat: '도전' },
+  { id: 'overcome_fear',name: '무서운 거 극복',       amount: 2500, emoji: '🦸', cat: '도전' },
+  { id: 'finish_hard',  name: '힘든 일 끝까지',       amount: 2000, emoji: '🏁', cat: '도전' },
+  { id: 'stage',        name: '발표·무대 서기',       amount: 3000, emoji: '🎭', cat: '도전' },
+  { id: 'compete',      name: '대회·시합 참가',       amount: 3000, emoji: '🏆', cat: '도전' },
+  { id: 'award',        name: '상장·상 받기',         amount: 10000,emoji: '🥇', cat: '도전' },
+
+  // 🎁 보너스
   { id: 'surprise',     name: '깜짝 칭찬 보너스',     amount: 3000, emoji: '🎁', cat: '보너스' },
-  { id: 'allowance',    name: '주간 용돈',            amount: 5000, emoji: '💰', cat: '보너스' }
+  { id: 'allowance',    name: '주간 용돈',            amount: 5000, emoji: '💰', cat: '보너스' },
+  { id: 'birthday_help',name: '특별한 날 도움',       amount: 5000, emoji: '🎂', cat: '보너스' },
+  { id: 'good_idea',    name: '좋은 아이디어 제안',   amount: 1500, emoji: '💡', cat: '보너스' },
+  { id: 'save_goal',    name: '저축 목표 달성',       amount: 5000, emoji: '🎯', cat: '보너스' },
+  { id: 'family_event', name: '가족행사 적극참여',    amount: 2000, emoji: '🎉', cat: '보너스' }
 ];
 
 const SHOP = {
@@ -917,6 +1228,41 @@ const SHOP = {
       { id: 'custom_toy',     name: '자유 장난감권',    emoji: '🧸', custom: true, placeholder: '예: 15000' },
       { id: 'custom_outing',  name: '자유 외출권',      emoji: '🚗', custom: true, placeholder: '예: 30000' }
     ]
+  },
+  lucky: {
+    label: '🎰 럭키박스',
+    items: [
+      { id: 'lucky_small',  name: '미니 럭키박스',  price: 1000,  emoji: '🎁', luckyBox: true,
+        prizes: [
+          { amount: 100,   weight: 30, emoji: '🪙' },
+          { amount: 500,   weight: 30, emoji: '💵' },
+          { amount: 1000,  weight: 25, emoji: '💴' },
+          { amount: 2000,  weight: 10, emoji: '💸' },
+          { amount: 5000,  weight: 4,  emoji: '💰' },
+          { amount: 10000, weight: 1,  emoji: '💎' }
+        ]
+      },
+      { id: 'lucky_medium', name: '럭키박스',       price: 5000,  emoji: '🎁', luckyBox: true,
+        prizes: [
+          { amount: 1000,  weight: 30, emoji: '💴' },
+          { amount: 3000,  weight: 30, emoji: '💸' },
+          { amount: 5000,  weight: 25, emoji: '💰' },
+          { amount: 10000, weight: 10, emoji: '💎' },
+          { amount: 30000, weight: 4,  emoji: '🏆' },
+          { amount: 50000, weight: 1,  emoji: '👑' }
+        ]
+      },
+      { id: 'lucky_big',    name: '대박 럭키박스',  price: 20000, emoji: '🎁', luckyBox: true,
+        prizes: [
+          { amount: 5000,   weight: 35, emoji: '💰' },
+          { amount: 15000,  weight: 30, emoji: '💎' },
+          { amount: 30000,  weight: 20, emoji: '🏆' },
+          { amount: 50000,  weight: 10, emoji: '👑' },
+          { amount: 100000, weight: 4,  emoji: '🌟' },
+          { amount: 200000, weight: 1,  emoji: '🎆' }
+        ]
+      }
+    ]
   }
 };
 
@@ -947,6 +1293,10 @@ function mergeWithDefaults(saved) {
   merged.deposits     = saved?.deposits     || [];
   merged.coupons      = saved?.coupons      || [];
   merged.transactions = saved?.transactions || [];
+  merged.goals        = saved?.goals        || [];
+  merged.autoSavings  = saved?.autoSavings  || [];
+  merged.messages     = saved?.messages     || [];
+  merged.luckyBoxes   = saved?.luckyBoxes   || {};
   return merged;
 }
 
@@ -1222,6 +1572,8 @@ function addReward(kidId, rewardId) {
   state.transactions.unshift(tx);
   const kid = getKid(kidId);
   if (kid) kid.balance += r.amount;
+  // 🎯 목표 달성 체크
+  checkGoalAchieved(kidId);
   saveState();
   render();
   toast(`${getKid(kidId).name}이(가) ${fmt(r.amount)}원 받았어요! 🎉`);
@@ -1261,6 +1613,24 @@ function buyItem(kidId, categoryKey, itemId, customPrice = null) {
 
   if (kid.balance < finalPrice) { toast('잔액이 부족해요', 'error'); return; }
 
+  // 🎰 럭키박스: 즉시 추첨
+  if (item.luckyBox) {
+    const total = item.prizes.reduce((s, p) => s + p.weight, 0);
+    let r = Math.random() * total;
+    let prize = item.prizes[0];
+    for (const p of item.prizes) {
+      r -= p.weight;
+      if (r <= 0) { prize = p; break; }
+    }
+    // 잔액 차감 + 상금 지급
+    addTx(kidId, 'purchase', -finalPrice, `${item.name} 구매`);
+    addTx(kidId, 'lucky', prize.amount, `🎰 ${item.name} 당첨 ${prize.emoji}`);
+    saveState();
+    render();
+    showLuckyResult(item, prize);
+    return;
+  }
+
   // 잔액 차감
   addTx(kidId, 'purchase', -finalPrice, `${finalName} 구매`);
   // 쿠폰 발행
@@ -1280,6 +1650,33 @@ function buyItem(kidId, categoryKey, itemId, customPrice = null) {
   saveState();
   render();
   toast(`${finalName} 쿠폰이 발행됐어요! 🎟️`);
+}
+
+/* ----- 🎰 럭키박스 결과 모달 ----- */
+function showLuckyResult(item, prize) {
+  const profit = prize.amount - item.price;
+  const isWin = profit >= 0;
+  const modal = document.createElement('div');
+  modal.className = 'modal';
+  modal.innerHTML = `
+    <div class="modal-content lucky-modal">
+      <h3 style="text-align:center;font-size:32px;margin-bottom:8px;">🎰</h3>
+      <p style="text-align:center;font-size:14px;color:var(--ink-soft);">두근두근... 결과는?</p>
+      <div class="lucky-result ${isWin ? 'win' : 'lose'}">
+        <div style="font-size:64px;margin-bottom:8px;">${prize.emoji}</div>
+        <div style="font-size:32px;font-weight:700;color:${isWin ? 'var(--accent)' : 'var(--danger)'};">
+          ${fmt(prize.amount)}원!
+        </div>
+        <div style="font-size:13px;margin-top:8px;color:var(--ink-soft);">
+          (구매가 ${fmt(item.price)}원 → ${isWin ? '+' : ''}${fmt(profit)}원 ${isWin ? '이익' : '손해'})
+        </div>
+      </div>
+      <button class="confirm" style="width:100%;padding:14px;background:var(--primary);color:white;border:var(--border-thin);border-radius:10px;font-family:inherit;font-weight:700;cursor:pointer;font-size:15px;">확인</button>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  modal.querySelector('.confirm').onclick = () => modal.remove();
+  modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
 }
 
 function useCoupon(couponId) {
@@ -1370,20 +1767,322 @@ function withdrawDeposit(depositId, force = false) {
 }
 
 /* =========================================================
+   🎯 목표 저금통
+========================================================= */
+function addGoal(kidId, name, target) {
+  target = parseInt(target);
+  if (!name || !target || target < 100) { toast('이름과 100원 이상 목표를 입력하세요', 'error'); return; }
+  state.goals.push({
+    id: uid(),
+    kidId,
+    name,
+    emoji: '🎯',
+    target,
+    ts: now(),
+    achieved: false
+  });
+  saveState();
+  render();
+  toast(`목표 "${name}" 등록됨! 💪`);
+}
+
+function deleteGoal(goalId) {
+  confirmModal('목표 삭제', '이 목표를 삭제할까요?', () => {
+    state.goals = state.goals.filter(g => g.id !== goalId);
+    saveState();
+    render();
+    toast('목표 삭제됨');
+  });
+}
+
+function checkGoalAchieved(kidId) {
+  const totalAssets = getKid(kidId).balance + calcStockValue(kidId) + calcDepositValue(kidId);
+  state.goals.forEach(g => {
+    if (g.kidId === kidId && !g.achieved && totalAssets >= g.target) {
+      g.achieved = true;
+      g.achievedAt = now();
+      toast(`🎊 목표 달성! "${g.name}" 🎊`, 'success');
+    }
+  });
+}
+
+/* =========================================================
+   🔥 연속 달성 (Streak) 보너스
+========================================================= */
+const STREAK_BONUSES = [
+  { days: 3,  bonus: 500,   emoji: '✨' },
+  { days: 7,  bonus: 2000,  emoji: '🔥' },
+  { days: 14, bonus: 5000,  emoji: '⚡' },
+  { days: 30, bonus: 15000, emoji: '🏅' },
+  { days: 100,bonus: 50000, emoji: '👑' }
+];
+
+function calcStreak(kidId, rewardId) {
+  // 같은 보상을 며칠 연속으로 받았는지 (오늘 받았다면 오늘부터, 어제까지)
+  const txs = state.transactions
+    .filter(t => t.kidId === kidId && t.type === 'reward' && t.rewardId === rewardId)
+    .map(t => {
+      const d = new Date(t.ts);
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    });
+  const dates = [...new Set(txs)].sort().reverse(); // 최신순
+  if (dates.length === 0) return 0;
+  // 오늘부터 거꾸로 며칠 연속인가
+  let streak = 0;
+  let cursor = new Date();
+  // 오늘 안받았다면 어제부터 카운트
+  const todayKey = getTodayLocalKey();
+  if (dates[0] !== todayKey) cursor.setDate(cursor.getDate() - 1);
+  for (let i = 0; i < dates.length; i++) {
+    const ck = `${cursor.getFullYear()}-${String(cursor.getMonth()+1).padStart(2,'0')}-${String(cursor.getDate()).padStart(2,'0')}`;
+    if (dates[i] === ck) {
+      streak++;
+      cursor.setDate(cursor.getDate() - 1);
+    } else if (dates[i] < ck) {
+      break;
+    }
+  }
+  return streak;
+}
+
+function checkAndApplyStreakBonus(kidId, rewardId, rewardName) {
+  const streak = calcStreak(kidId, rewardId);
+  // 정확히 N일 달성한 시점에만 보너스 (3, 7, 14, 30, 100)
+  const milestone = STREAK_BONUSES.find(b => b.days === streak);
+  if (milestone) {
+    const tx = { id: uid(), kidId, type: 'reward', amount: milestone.bonus, desc: `🔥 ${rewardName} ${streak}일 연속 보너스!`, ts: now() };
+    state.transactions.unshift(tx);
+    getKid(kidId).balance += milestone.bonus;
+    setTimeout(() => toast(`${milestone.emoji} ${streak}일 연속 달성! +${fmt(milestone.bonus)}원 보너스!`, 'success'), 800);
+  }
+}
+
+/* =========================================================
+   🎰 럭키 박스 (랜덤 보상)
+========================================================= */
+function canClaimLuckyBox(kidId) {
+  const today = getTodayLocalKey();
+  const box = state.luckyBoxes[kidId];
+  if (!box) return true; // 처음 사용
+  if (box.lastClaimDate === today) return false; // 오늘 이미 받음
+  return today >= box.nextDate;
+}
+
+function claimLuckyBox(kidId) {
+  if (!canClaimLuckyBox(kidId)) {
+    const box = state.luckyBoxes[kidId];
+    toast(`다음 럭키박스는 ${box.nextDate}에! 🎁`, 'error');
+    return;
+  }
+  // 가중치 랜덤: 작은 금액이 더 자주, 큰 금액은 가끔
+  const rolls = [
+    { amount: 100,   weight: 30, emoji: '🪙' },
+    { amount: 500,   weight: 25, emoji: '💵' },
+    { amount: 1000,  weight: 20, emoji: '💴' },
+    { amount: 3000,  weight: 15, emoji: '💸' },
+    { amount: 5000,  weight: 7,  emoji: '💰' },
+    { amount: 10000, weight: 2,  emoji: '💎' },
+    { amount: 50000, weight: 1,  emoji: '🏆' }
+  ];
+  const total = rolls.reduce((s, r) => s + r.weight, 0);
+  let r = Math.random() * total;
+  let prize = rolls[0];
+  for (const roll of rolls) {
+    r -= roll.weight;
+    if (r <= 0) { prize = roll; break; }
+  }
+
+  // 다음 박스는 3~7일 후 랜덤
+  const nextDays = 3 + Math.floor(Math.random() * 5);
+  const nextDate = new Date();
+  nextDate.setDate(nextDate.getDate() + nextDays);
+  const nextKey = `${nextDate.getFullYear()}-${String(nextDate.getMonth()+1).padStart(2,'0')}-${String(nextDate.getDate()).padStart(2,'0')}`;
+
+  state.luckyBoxes[kidId] = {
+    lastClaimDate: getTodayLocalKey(),
+    nextDate: nextKey
+  };
+
+  addTx(kidId, 'lucky', prize.amount, `🎰 럭키박스 ${prize.emoji}`);
+  saveState();
+  render();
+  // 화려한 토스트
+  setTimeout(() => toast(`${prize.emoji} 럭키박스! ${fmt(prize.amount)}원 획득! 🎉`, 'success'), 100);
+}
+
+/* =========================================================
+   🏦 자동 적금 (정기 자동이체)
+========================================================= */
+function addAutoSaving(kidId, amount, dayOfWeek) {
+  amount = parseInt(amount);
+  if (!amount || amount < 100) { toast('100원 이상 입력해주세요', 'error'); return; }
+  state.autoSavings.push({
+    id: uid(),
+    kidId,
+    amount,
+    day: parseInt(dayOfWeek),  // 0=일, 1=월, ..., 6=토
+    lastRunDate: null,
+    createdAt: now()
+  });
+  saveState();
+  render();
+  const dayNames = ['일','월','화','수','목','금','토'];
+  toast(`매주 ${dayNames[dayOfWeek]}요일 ${fmt(amount)}원 자동저축 등록!`);
+}
+
+function deleteAutoSaving(savingId) {
+  state.autoSavings = state.autoSavings.filter(s => s.id !== savingId);
+  saveState();
+  render();
+  toast('자동저축 해제됨');
+}
+
+function runAutoSavingsIfDue() {
+  const today = new Date();
+  const todayKey = getTodayLocalKey();
+  const todayDayOfWeek = today.getDay();
+  let ran = false;
+  state.autoSavings.forEach(saving => {
+    if (saving.day !== todayDayOfWeek) return;
+    if (saving.lastRunDate === todayKey) return;
+    // 실행
+    const kid = getKid(saving.kidId);
+    if (!kid) return;
+    if (kid.balance >= saving.amount) {
+      addTx(saving.kidId, 'auto_save', -saving.amount, `🏦 자동저축 ${fmt(saving.amount)}원`);
+      // 6개월 자유 예금으로 저축
+      state.deposits.push({
+        id: uid(),
+        kidId: saving.kidId,
+        amount: saving.amount,
+        startTs: now(),
+        termDays: 0,
+        rate: 0.02
+      });
+      saving.lastRunDate = todayKey;
+      ran = true;
+    }
+  });
+  if (ran) saveState();
+}
+
+/* =========================================================
+   💱 남매 거래 (송금)
+========================================================= */
+function transferToSibling(fromKidId, toKidId, amount) {
+  amount = parseInt(amount);
+  if (!amount || amount < 100) { toast('100원 이상 보낼 수 있어요', 'error'); return; }
+  const fromKid = getKid(fromKidId);
+  const toKid = getKid(toKidId);
+  if (!fromKid || !toKid) return;
+  if (fromKid.balance < amount) { toast('잔액이 부족해요', 'error'); return; }
+  addTx(fromKidId, 'transfer_out', -amount, `💝 ${toKid.name}에게 송금`);
+  addTx(toKidId,   'transfer_in',  amount,  `💝 ${fromKid.name}에게 받음`);
+  saveState();
+  render();
+  toast(`${toKid.name}에게 ${fmt(amount)}원 보냈어요 💝`);
+}
+
+/* =========================================================
+   🎁 부모님 깜짝 메시지 (보너스 + 메시지)
+========================================================= */
+function sendParentMessage(kidId, text, amount) {
+  amount = parseInt(amount) || 0;
+  if (!text || text.trim().length === 0) { toast('메시지를 입력하세요', 'error'); return; }
+  const message = {
+    id: uid(),
+    kidId,
+    text: text.trim(),
+    amount,
+    ts: now(),
+    read: false
+  };
+  state.messages.unshift(message);
+  if (amount > 0) {
+    addTx(kidId, 'parent_bonus', amount, `💌 부모님 메시지: ${text.slice(0, 20)}${text.length > 20 ? '...' : ''}`);
+  } else {
+    saveState();
+  }
+  render();
+  toast(`${getKid(kidId).name}에게 메시지 발송됨 💌`);
+}
+
+function markMessageRead(messageId) {
+  const m = state.messages.find(x => x.id === messageId);
+  if (m && !m.read) {
+    m.read = true;
+    saveState();
+    render();
+  }
+}
+
+/* =========================================================
+   ⚠️ 벌금 (약속 안 지킬 때 차감)
+========================================================= */
+const PENALTIES = [
+  { id: 'fight',     name: '형제 싸움',          amount: 1000, emoji: '😠' },
+  { id: 'lie',       name: '거짓말',             amount: 2000, emoji: '🤥' },
+  { id: 'no_brush',  name: '양치 안 함',         amount: 500,  emoji: '🦷' },
+  { id: 'late_sleep',name: '너무 늦게 자기',     amount: 1000, emoji: '🌙' },
+  { id: 'no_homework',name: '숙제 안 하기',      amount: 3000, emoji: '📕' },
+  { id: 'phone_over',name: '폰·게임 시간 초과',  amount: 2000, emoji: '📱' },
+  { id: 'rude',      name: '말 함부로 하기',     amount: 1500, emoji: '😡' },
+  { id: 'mess',      name: '방 어지르기',        amount: 1000, emoji: '🗑️' },
+  { id: 'whining',   name: '떼쓰기',             amount: 1000, emoji: '😤' },
+  { id: 'custom',    name: '직접 입력',          amount: 0,    emoji: '⚠️' }
+];
+
+function applyPenalty(kidId, penaltyId, customAmount = null, customReason = null) {
+  const kid = getKid(kidId);
+  if (!kid) return;
+  const penalty = PENALTIES.find(p => p.id === penaltyId);
+  if (!penalty) return;
+
+  let amount, reason;
+  if (penalty.id === 'custom') {
+    amount = parseInt(customAmount);
+    reason = customReason?.trim() || '벌금';
+    if (!amount || amount < 100) { toast('100원 이상 입력하세요', 'error'); return; }
+  } else {
+    amount = penalty.amount;
+    reason = penalty.name;
+  }
+
+  if (kid.balance < amount) {
+    toast(`잔액(${fmt(kid.balance)}원)이 벌금보다 적어요. 가능한 만큼만 차감할까요?`, 'error');
+    confirmModal('벌금 부족', `잔액 ${fmt(kid.balance)}원 전부를 차감할까요?`, () => {
+      addTx(kidId, 'penalty', -kid.balance, `⚠️ ${reason} (잔액 차감)`);
+      saveState();
+      render();
+      toast(`${kid.name} 잔액 ${fmt(kid.balance)}원 차감됨`);
+    });
+    return;
+  }
+
+  addTx(kidId, 'penalty', -amount, `⚠️ ${reason}`);
+  saveState();
+  render();
+  toast(`${kid.name} ${fmt(amount)}원 벌금 차감됨`, 'error');
+}
+
+/* =========================================================
    뷰 렌더링
 ========================================================= */
 function render() {
   if (!initialLoadDone) return; // Firebase 초기 로드 전에는 렌더 생략
   updateStockPricesIfNeeded();
+  runAutoSavingsIfDue();
   document.querySelectorAll('.tab').forEach(t => {
     t.classList.toggle('active', t.dataset.view === currentView);
   });
   const view = document.getElementById('view');
   if      (currentView === 'home')   view.innerHTML = renderHome();
   else if (currentView === 'assets') view.innerHTML = renderAssets();
+  else if (currentView === 'goals')  view.innerHTML = renderGoals();
   else if (currentView === 'shop')   view.innerHTML = renderShop();
   else if (currentView === 'stock')  view.innerHTML = renderStock();
   else if (currentView === 'bank')   view.innerHTML = renderBank();
+  else if (currentView === 'stats')  view.innerHTML = renderStats();
   attachHandlers();
 }
 
@@ -1433,7 +2132,92 @@ function renderHome() {
       `;}).join('')}
     </div>
 
+    ${renderMessagesSection()}
+    ${renderTransferSection()}
     ${renderCouponsSection()}
+  `;
+}
+
+/* ----- 🎰 럭키박스 섹션 ----- */
+function renderLuckyBoxSection() {
+  return `
+    <div class="card" style="margin-top:16px;">
+      <h2>🎰 럭키 박스</h2>
+      <p style="color:var(--ink-soft);font-size:13px;margin-bottom:14px;">며칠에 한 번씩 깜짝 등장하는 행운 상자! 100원~50,000원 랜덤 ✨</p>
+      <div class="lucky-grid">
+        ${state.kids.map(kid => {
+          const can = canClaimLuckyBox(kid.id);
+          const box = state.luckyBoxes[kid.id];
+          return `
+            <div class="lucky-box ${can ? 'ready' : 'wait'}">
+              <div class="lucky-emoji">${can ? '🎁' : '⏳'}</div>
+              <div class="lucky-name">${kid.name}</div>
+              ${can
+                ? `<button class="lucky-btn" data-action="lucky" data-kid="${kid.id}">📦 박스 열기!</button>`
+                : `<div class="lucky-wait">다음 박스: ${box?.nextDate || '-'}</div>`
+              }
+            </div>
+          `;
+        }).join('')}
+      </div>
+    </div>
+  `;
+}
+
+/* ----- 💌 부모님 메시지 섹션 ----- */
+function renderMessagesSection() {
+  const recent = state.messages.slice(0, 5);
+  if (recent.length === 0 && !isAdmin) return '';
+  return `
+    <div class="card" style="margin-top:16px;">
+      <h2>💌 부모님 메시지함</h2>
+      ${isAdmin ? `
+        <div class="msg-form">
+          <select class="form-select" id="msg-kid">
+            ${state.kids.map(k => `<option value="${k.id}">${k.name}에게</option>`).join('')}
+          </select>
+          <input type="text" class="form-input" id="msg-text" placeholder="메시지 (예: 오늘 잘했어! 💕)" maxlength="100">
+          <input type="number" class="form-input" id="msg-amount" placeholder="보너스 (선택)" min="0">
+          <button class="admin-btn" style="background:var(--primary);" data-action="send-msg">발송</button>
+        </div>
+      ` : ''}
+      ${recent.length === 0 ? '<p class="empty">아직 받은 메시지가 없어요</p>' : `
+        <div class="msg-list">
+          ${recent.map(m => `
+            <div class="msg-item ${m.read ? 'read' : 'unread'}">
+              <div class="msg-head">
+                <span class="msg-to">→ ${getKid(m.kidId)?.name || '?'}</span>
+                <span class="msg-time">${new Date(m.ts).toLocaleString('ko-KR',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})}</span>
+              </div>
+              <div class="msg-text">${m.text}</div>
+              ${m.amount > 0 ? `<div class="msg-amount">+${fmt(m.amount)}원 보너스 💝</div>` : ''}
+            </div>
+          `).join('')}
+        </div>
+      `}
+    </div>
+  `;
+}
+
+/* ----- 💱 남매 송금 ----- */
+function renderTransferSection() {
+  if (state.kids.length < 2) return '';
+  return `
+    <div class="card" style="margin-top:16px;">
+      <h2>💝 남매 선물하기</h2>
+      <p style="color:var(--ink-soft);font-size:13px;margin-bottom:14px;">서로에게 돈을 선물할 수 있어요. 양보하는 마음을 길러요 🤝</p>
+      <div class="transfer-form">
+        <select class="form-select" id="transfer-from">
+          ${state.kids.map(k => `<option value="${k.id}">${k.name} (${fmt(k.balance)}원)</option>`).join('')}
+        </select>
+        <span style="font-size:20px;align-self:center;text-align:center;">→</span>
+        <select class="form-select" id="transfer-to">
+          ${state.kids.map(k => `<option value="${k.id}">${k.name}</option>`).join('')}
+        </select>
+        <input type="number" class="form-input" id="transfer-amount" placeholder="금액" min="100">
+        <button class="admin-btn" style="background:var(--accent);" data-action="transfer">선물 보내기</button>
+      </div>
+    </div>
   `;
 }
 
@@ -1530,7 +2314,37 @@ function renderAssets() {
         </div>
       </div>
     `;
-  }).join('');
+  }).join('') + (isAdmin ? renderPenaltySection() : '');
+}
+
+/* ----- ⚠️ 벌금 섹션 (부모님 모드 전용) ----- */
+function renderPenaltySection() {
+  return `
+    <div class="card" style="background:#FFF0F0;border-color:var(--danger);">
+      <h2>⚠️ 벌금 부과</h2>
+      <p style="color:var(--ink-soft);font-size:13px;margin-bottom:14px;">
+        약속을 안 지켰을 때 사용해요. 너무 자주 쓰면 역효과니까 <strong>가끔만</strong> 쓰는 걸 추천해요.
+      </p>
+      ${state.kids.map(kid => `
+        <div style="margin-bottom:20px;">
+          <h3>${kid.name} ${kid.gender === 'boy' ? '👦' : '👧'} · 잔액 ${fmt(kid.balance)}원</h3>
+          <div class="penalty-grid">
+            ${PENALTIES.filter(p => p.id !== 'custom').map(p => `
+              <button class="penalty-btn" data-action="penalty" data-kid="${kid.id}" data-penalty="${p.id}">
+                <span>${p.emoji} ${p.name}</span>
+                <span class="penalty-amount">-${fmt(p.amount)}</span>
+              </button>
+            `).join('')}
+          </div>
+          <div class="penalty-custom">
+            <input type="text" class="form-input" id="penalty-reason-${kid.id}" placeholder="사유 (예: 약속 어김)" maxlength="30">
+            <input type="number" class="form-input" id="penalty-amount-${kid.id}" placeholder="금액" min="100">
+            <button class="penalty-btn-custom" data-action="penalty-custom" data-kid="${kid.id}">⚠️ 직접 부과</button>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
 }
 
 /* ----- 상점 ----- */
@@ -1586,6 +2400,22 @@ function renderShop() {
             `;
           }
           const can = kid.balance >= item.price;
+          if (item.luckyBox) {
+            // 럭키박스 - 추첨식
+            const min = Math.min(...item.prizes.map(p => p.amount));
+            const max = Math.max(...item.prizes.map(p => p.amount));
+            return `
+              <div class="shop-item lucky-item ${can ? 'affordable' : ''}">
+                <div class="shop-emoji">${item.emoji}</div>
+                <div class="shop-name">${item.name}</div>
+                <div class="custom-hint">🎲 ${fmt(min)}원 ~ ${fmt(max)}원 랜덤!</div>
+                <div class="shop-price">${fmt(item.price)}원</div>
+                <button class="shop-buy" data-action="buy" data-cat="${shopCategory}" data-item="${item.id}" ${can ? '' : 'disabled'}>
+                  ${can ? '🎰 뽑기!' : '잔액 부족'}
+                </button>
+              </div>
+            `;
+          }
           return `
             <div class="shop-item ${can ? 'affordable' : ''}">
               <div class="shop-emoji">${item.emoji}</div>
@@ -1730,6 +2560,180 @@ function renderBank() {
                 }).join('')}
               </div>
             `}
+
+            ${renderAutoSavingsForKid(kid.id)}
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+}
+
+/* ----- 🏦 자동 적금 (자녀별) ----- */
+function renderAutoSavingsForKid(kidId) {
+  const my = state.autoSavings.filter(s => s.kidId === kidId);
+  const dayNames = ['일','월','화','수','목','금','토'];
+  return `
+    <div style="margin-top:20px;padding:14px;background:#FFF8D6;border:var(--border-thin);border-radius:12px;">
+      <h4 style="font-size:14px;margin-bottom:6px;">💰 자동 저축 설정</h4>
+      <p style="font-size:12px;color:var(--ink-soft);margin-bottom:10px;">자유 예금으로 자동 저축돼요 · <strong style="color:var(--gold);">연 2.0% 이자</strong> 적용 (언제든 출금 가능)</p>
+      <div class="autosave-form">
+        <input type="number" class="form-input" id="autosave-amount-${kidId}" placeholder="금액" min="100">
+        <select class="form-select" id="autosave-day-${kidId}">
+          ${dayNames.map((d, i) => `<option value="${i}">${d}요일</option>`).join('')}
+        </select>
+        <button class="admin-btn" style="background:var(--gold);" data-action="add-autosave" data-kid="${kidId}">+ 등록</button>
+      </div>
+      ${my.length === 0 ? '<div class="empty" style="padding:10px;">자동 저축 설정 없음</div>' : `
+        <div class="autosave-list">
+          ${my.map(s => `
+            <div class="autosave-item">
+              <span>매주 ${dayNames[s.day]}요일 ${fmt(s.amount)}원 자동 저축 (연 2.0%)</span>
+              <button class="del-mini-btn" data-action="del-autosave" data-id="${s.id}">×</button>
+            </div>
+          `).join('')}
+        </div>
+      `}
+    </div>
+  `;
+}
+function renderGoals() {
+  return `
+    <div class="card">
+      <h2>🎯 목표 저금통</h2>
+      <p style="color:var(--ink-soft);font-size:13px;margin-bottom:16px;">갖고 싶은 걸 등록하고, 돈을 모아 달성해봐요! 진행률을 보면서 동기부여 받아요 💪</p>
+
+      ${state.kids.map(kid => {
+        const totalAssets = kid.balance + calcStockValue(kid.id) + calcDepositValue(kid.id);
+        const myGoals = state.goals.filter(g => g.kidId === kid.id);
+        return `
+          <div style="margin-bottom:24px;">
+            <h3>${kid.name} · 총 자산 ${fmt(totalAssets)}원</h3>
+
+            <div class="goal-form">
+              <input type="text" class="form-input" id="goal-name-${kid.id}" placeholder="목표 이름" maxlength="20">
+              <input type="number" class="form-input" id="goal-target-${kid.id}" placeholder="목표 금액" min="100">
+              <button class="admin-btn" style="background:var(--primary);" data-action="add-goal" data-kid="${kid.id}">+ 추가</button>
+            </div>
+
+            ${myGoals.length === 0 ? '<div class="empty">아직 목표가 없어요. 갖고 싶은 걸 등록해봐요!</div>' : `
+              <div class="goal-list">
+                ${myGoals.map(g => {
+                  const progress = Math.min(100, (totalAssets / g.target) * 100);
+                  const remaining = Math.max(0, g.target - totalAssets);
+                  return `
+                    <div class="goal-card ${g.achieved ? 'achieved' : ''}">
+                      <div class="goal-head">
+                        <div>
+                          <div class="goal-name">${g.emoji} ${g.name} ${g.achieved ? '🏆' : ''}</div>
+                          <div class="goal-target">목표: ${fmt(g.target)}원</div>
+                        </div>
+                        <button class="del-mini-btn" data-action="del-goal" data-id="${g.id}">×</button>
+                      </div>
+                      <div class="goal-bar"><div class="goal-bar-fill" style="width:${progress}%"></div></div>
+                      <div class="goal-meta">
+                        <span>${progress.toFixed(0)}% 달성</span>
+                        ${g.achieved 
+                          ? `<span style="color:var(--accent);font-weight:700;">🎉 달성!</span>`
+                          : `<span>${fmt(remaining)}원 남음</span>`
+                        }
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            `}
+          </div>
+        `;
+      }).join('')}
+
+      <div style="margin-top:20px;padding:14px;background:var(--bg-2);border-radius:12px;font-size:13px;color:var(--ink-soft);">
+        💡 <strong>팁:</strong> 총 자산 = 현금 + 주식평가액 + 예금. 즉 모든 자산이 목표 달성에 포함돼요!
+      </div>
+    </div>
+  `;
+}
+
+/* ----- 📊 통계 페이지 ----- */
+function renderStats() {
+  // 카테고리별 보상 개수, 이번주/이번달 통계, 연속 기록 등
+  const today = new Date();
+  const weekStart = new Date(today);
+  weekStart.setDate(today.getDate() - today.getDay()); // 일요일
+  weekStart.setHours(0,0,0,0);
+  const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+
+  return `
+    <div class="card">
+      <h2>📊 통계 대시보드</h2>
+      <p style="color:var(--ink-soft);font-size:13px;margin-bottom:16px;">우리 가족의 보상 패턴을 한눈에 봐요!</p>
+
+      ${state.kids.map(kid => {
+        const myTxs = state.transactions.filter(t => t.kidId === kid.id);
+        const rewards = myTxs.filter(t => t.type === 'reward');
+        const thisWeek = rewards.filter(t => new Date(t.ts) >= weekStart);
+        const thisMonth = rewards.filter(t => new Date(t.ts) >= monthStart);
+        const weekTotal = thisWeek.reduce((s, t) => s + t.amount, 0);
+        const monthTotal = thisMonth.reduce((s, t) => s + t.amount, 0);
+
+        // 카테고리별 카운트
+        const catCount = {};
+        rewards.forEach(t => {
+          if (t.rewardId) {
+            const r = REWARDS.find(x => x.id === t.rewardId);
+            if (r) catCount[r.cat] = (catCount[r.cat] || 0) + 1;
+          }
+        });
+        const sortedCats = Object.entries(catCount).sort((a,b) => b[1]-a[1]);
+        const maxCount = sortedCats[0]?.[1] || 1;
+
+        // 가장 많이 받은 보상 TOP 5
+        const rewardCount = {};
+        rewards.forEach(t => {
+          if (t.rewardId) rewardCount[t.rewardId] = (rewardCount[t.rewardId] || 0) + 1;
+        });
+        const topRewards = Object.entries(rewardCount).sort((a,b) => b[1]-a[1]).slice(0, 5);
+
+        return `
+          <div style="margin-bottom:28px;padding:18px;border:var(--border-thin);border-radius:14px;background:var(--bg);">
+            <h3>${kid.name} ${kid.gender === 'boy' ? '👦' : '👧'}</h3>
+
+            <div class="stat-grid">
+              <div class="stat-box"><div class="stat-label">이번 주 보상 수</div><div class="stat-value">${thisWeek.length}회</div></div>
+              <div class="stat-box"><div class="stat-label">이번 주 합계</div><div class="stat-value">${fmt(weekTotal)}원</div></div>
+              <div class="stat-box"><div class="stat-label">이번 달 보상 수</div><div class="stat-value">${thisMonth.length}회</div></div>
+              <div class="stat-box"><div class="stat-label">이번 달 합계</div><div class="stat-value">${fmt(monthTotal)}원</div></div>
+            </div>
+
+            ${sortedCats.length > 0 ? `
+              <h4 style="margin:16px 0 10px;font-size:14px;">📁 카테고리별 보상 횟수</h4>
+              <div class="cat-bars">
+                ${sortedCats.map(([cat, count]) => `
+                  <div class="cat-bar-row">
+                    <span class="cat-bar-label">${cat}</span>
+                    <div class="cat-bar"><div class="cat-bar-fill" style="width:${(count/maxCount)*100}%"></div></div>
+                    <span class="cat-bar-count">${count}</span>
+                  </div>
+                `).join('')}
+              </div>
+            ` : '<p class="empty">아직 데이터가 없어요</p>'}
+
+            ${topRewards.length > 0 ? `
+              <h4 style="margin:16px 0 10px;font-size:14px;">🏆 자주 받은 보상 TOP 5</h4>
+              <div class="top-list">
+                ${topRewards.map(([rid, count], i) => {
+                  const r = REWARDS.find(x => x.id === rid);
+                  if (!r) return '';
+                  return `
+                    <div class="top-item">
+                      <span class="top-rank">#${i+1}</span>
+                      <span class="top-name">${r.emoji} ${r.name}</span>
+                      <span class="top-count">${count}번</span>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            ` : ''}
           </div>
         `;
       }).join('')}
@@ -1784,6 +2788,49 @@ function attachHandlers() {
       }
       else if (a === 'withdraw') withdrawDeposit(el.dataset.id);
       else if (a === 'edit-balance') editBalance(el.dataset.kid);
+      else if (a === 'lucky') {
+        if (isAdmin) claimLuckyBox(el.dataset.kid);
+        else passwordModal(() => claimLuckyBox(el.dataset.kid));
+      }
+      else if (a === 'add-goal') {
+        const kidId = el.dataset.kid;
+        const name = document.getElementById(`goal-name-${kidId}`).value;
+        const target = document.getElementById(`goal-target-${kidId}`).value;
+        addGoal(kidId, name, target);
+      }
+      else if (a === 'del-goal') deleteGoal(el.dataset.id);
+      else if (a === 'transfer') {
+        const from = document.getElementById('transfer-from').value;
+        const to   = document.getElementById('transfer-to').value;
+        const amt  = document.getElementById('transfer-amount').value;
+        if (from === to) { toast('같은 사람에게는 보낼 수 없어요', 'error'); return; }
+        transferToSibling(from, to, amt);
+      }
+      else if (a === 'send-msg') {
+        if (!isAdmin) { toast('부모님 모드에서만 발송 가능', 'error'); return; }
+        const kidId = document.getElementById('msg-kid').value;
+        const text = document.getElementById('msg-text').value;
+        const amount = document.getElementById('msg-amount').value;
+        sendParentMessage(kidId, text, amount);
+      }
+      else if (a === 'add-autosave') {
+        const kidId = el.dataset.kid;
+        const amount = document.getElementById(`autosave-amount-${kidId}`).value;
+        const day = document.getElementById(`autosave-day-${kidId}`).value;
+        addAutoSaving(kidId, amount, day);
+      }
+      else if (a === 'del-autosave') deleteAutoSaving(el.dataset.id);
+      else if (a === 'penalty') {
+        if (!isAdmin) { passwordModal(() => applyPenalty(el.dataset.kid, el.dataset.penalty)); }
+        else applyPenalty(el.dataset.kid, el.dataset.penalty);
+      }
+      else if (a === 'penalty-custom') {
+        const kidId = el.dataset.kid;
+        const reason = document.getElementById(`penalty-reason-${kidId}`).value;
+        const amount = document.getElementById(`penalty-amount-${kidId}`).value;
+        if (!isAdmin) { passwordModal(() => applyPenalty(kidId, 'custom', amount, reason)); }
+        else applyPenalty(kidId, 'custom', amount, reason);
+      }
     };
   });
 }
