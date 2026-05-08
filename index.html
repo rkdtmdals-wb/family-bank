@@ -120,7 +120,7 @@ body {
 /* ===== 탭 네비게이션 ===== */
 .tabs {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(8, 1fr);
   gap: 6px;
   background: var(--surface);
   border: var(--border);
@@ -828,13 +828,15 @@ body {
   gap: 8px;
   margin-bottom: 16px;
 }
+.goal-form .form-input { font-size: 14px; padding: 10px; }
 @media (max-width: 720px) {
-  .goal-form { grid-template-columns: 1fr 1fr; }
+  .goal-form { grid-template-columns: 1fr 1fr; gap: 6px; }
   .goal-form button { grid-column: 1 / -1; }
+  .goal-form .form-input { font-size: 13px; padding: 9px; }
 }
 .goal-list { display: grid; gap: 12px; }
 .goal-card {
-  padding: 16px;
+  padding: 14px;
   border: var(--border-thin);
   border-radius: 14px;
   background: linear-gradient(135deg, #FFF4D6, #FFFFFF);
@@ -843,9 +845,15 @@ body {
   background: linear-gradient(135deg, #D7EFDF, #FFFFFF);
   border-color: var(--accent);
 }
-.goal-head { display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px; }
-.goal-name { font-weight: 700; font-size: 16px; }
-.goal-target { font-size: 12px; color: var(--ink-soft); margin-top: 2px; }
+.goal-head { display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px; }
+.goal-name { font-weight: 700; font-size: 15px; }
+.goal-target { font-size: 11px; color: var(--ink-soft); margin-top: 2px; }
+@media (max-width: 720px) {
+  .goal-card { padding: 12px; }
+  .goal-name { font-size: 14px; }
+  .goal-target { font-size: 11px; }
+  .goal-meta { font-size: 12px; }
+}
 .goal-bar {
   height: 14px;
   background: var(--surface);
@@ -872,6 +880,69 @@ body {
   font-family: inherit;
 }
 .del-mini-btn:hover { background: var(--danger); color: white; }
+
+/* 📜 퀘스트 */
+.quest-form-card {
+  padding: 14px;
+  background: var(--accent-soft);
+  border: var(--border-thin);
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+.quest-form {
+  display: grid;
+  grid-template-columns: auto 2fr 1fr 1fr auto;
+  gap: 8px;
+}
+.quest-form .form-input, .quest-form .form-select { font-size: 13px; padding: 9px; }
+@media (max-width: 720px) {
+  .quest-form { grid-template-columns: 1fr 1fr; }
+  .quest-form button { grid-column: 1 / -1; }
+}
+.quest-list { display: grid; gap: 10px; margin-top: 10px; }
+.quest-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px;
+  border: var(--border-thin);
+  border-radius: 12px;
+  background: linear-gradient(135deg, #FFF4D6, #FFFFFF);
+  gap: 10px;
+}
+.quest-card.open { border-left: 5px solid var(--gold); }
+.quest-card.late { background: linear-gradient(135deg, #FFE0E0, #FFFFFF); border-left-color: var(--danger); }
+.quest-card.completed {
+  background: linear-gradient(135deg, #D7EFDF, #FFFFFF);
+  border-left: 5px solid var(--accent);
+  opacity: 0.8;
+}
+.quest-info { flex: 1; min-width: 0; }
+.quest-title { font-weight: 700; font-size: 15px; margin-bottom: 4px; }
+.quest-meta { display: flex; gap: 12px; font-size: 12px; flex-wrap: wrap; }
+.quest-reward { font-weight: 700; color: var(--primary); }
+.quest-deadline { color: var(--ink-soft); }
+.quest-deadline.late { color: var(--danger); font-weight: 700; }
+.quest-actions { display: flex; gap: 6px; align-items: center; }
+.quest-complete {
+  padding: 9px 14px;
+  background: var(--accent);
+  color: white;
+  border: var(--border-thin);
+  border-color: var(--ink);
+  border-radius: 8px;
+  font-family: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 13px;
+  white-space: nowrap;
+}
+.quest-complete:hover { background: #2f6148; }
+@media (max-width: 720px) {
+  .quest-card { padding: 12px; }
+  .quest-title { font-size: 14px; }
+  .quest-complete { font-size: 12px; padding: 8px 12px; }
+}
 
 /* 📊 통계 */
 .stat-grid {
@@ -1039,6 +1110,7 @@ body {
     <button class="tab active" data-view="home"><span class="emoji">🏠</span>홈</button>
     <button class="tab" data-view="assets"><span class="emoji">💰</span>내자산</button>
     <button class="tab" data-view="goals"><span class="emoji">🎯</span>목표</button>
+    <button class="tab" data-view="quests"><span class="emoji">📜</span>퀘스트</button>
     <button class="tab" data-view="shop"><span class="emoji">🛒</span>상점</button>
     <button class="tab" data-view="stock"><span class="emoji">📈</span>주식</button>
     <button class="tab" data-view="bank"><span class="emoji">🏦</span>예금</button>
@@ -1064,6 +1136,7 @@ const DEFAULT_STATE = {
   holdings: {},        // { kidId: { ticker: shares } }
   deposits: [],        // {id, kidId, amount, startTs, termDays, rate, withdrawnAt}
   goals: [],           // {id, kidId, name, emoji, target, ts, achieved}
+  quests: [],          // {id, kidId, title, reward, deadline, ts, status: 'open'|'completed'|'rejected'}
   autoSavings: [],     // {id, kidId, amount, day, lastRunDate}  매주 OO원 자동 저축
   messages: [],        // {id, kidId, text, amount, ts, read}  부모님 깜짝 메시지
   luckyBoxes: {},      // { kidId: { lastClaimDate: 'YYYY-MM-DD', nextDate: 'YYYY-MM-DD' } }
@@ -1294,6 +1367,7 @@ function mergeWithDefaults(saved) {
   merged.coupons      = saved?.coupons      || [];
   merged.transactions = saved?.transactions || [];
   merged.goals        = saved?.goals        || [];
+  merged.quests       = saved?.quests       || [];
   merged.autoSavings  = saved?.autoSavings  || [];
   merged.messages     = saved?.messages     || [];
   merged.luckyBoxes   = saved?.luckyBoxes   || {};
@@ -1486,14 +1560,22 @@ function toast(msg, type = 'success') {
   setTimeout(() => el.remove(), 2800);
 }
 
+function getTodayPassword() {
+  // 오늘 날짜 MMDD 형태 (예: 3월 4일 → 0304)
+  const d = new Date();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return m + day;
+}
+
 function passwordModal(callback) {
   const modal = document.createElement('div');
   modal.className = 'modal';
   modal.innerHTML = `
     <div class="modal-content">
       <h3>🔒 부모님 비밀번호</h3>
-      <p>관리 기능을 사용하려면 비밀번호를 입력하세요.</p>
-      <input type="password" class="modal-input" id="pw-input" placeholder="비밀번호" autofocus>
+      <p>오늘 날짜 4자리를 입력하세요 (월월일일)</p>
+      <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" class="modal-input" id="pw-input" placeholder="••••" autofocus>
       <div class="modal-buttons">
         <button class="cancel" id="pw-cancel">취소</button>
         <button class="confirm" id="pw-confirm">확인</button>
@@ -1506,7 +1588,7 @@ function passwordModal(callback) {
   const close = () => modal.remove();
   modal.querySelector('#pw-cancel').onclick = close;
   modal.querySelector('#pw-confirm').onclick = () => {
-    if (input.value === state.adminPassword) { close(); callback(); }
+    if (input.value === getTodayPassword()) { close(); callback(); }
     else { toast('비밀번호가 틀렸습니다', 'error'); input.value = ''; input.focus(); }
   };
   input.onkeypress = (e) => { if (e.key === 'Enter') modal.querySelector('#pw-confirm').click(); };
@@ -1807,6 +1889,48 @@ function checkGoalAchieved(kidId) {
 }
 
 /* =========================================================
+   📜 퀘스트 시스템
+========================================================= */
+function addQuest(kidId, title, reward, deadline) {
+  reward = parseInt(reward);
+  if (!title || !reward || reward < 100) { toast('제목과 100원 이상 보상을 입력하세요', 'error'); return; }
+  state.quests.push({
+    id: uid(),
+    kidId,
+    title: title.trim(),
+    reward,
+    deadline: deadline || null,
+    ts: now(),
+    status: 'open'
+  });
+  saveState();
+  render();
+  toast(`퀘스트 "${title}" 발행됨! 📜`);
+}
+
+function completeQuest(questId) {
+  const q = state.quests.find(x => x.id === questId);
+  if (!q || q.status !== 'open') return;
+  q.status = 'completed';
+  q.completedAt = now();
+  // 보상 지급
+  addTx(q.kidId, 'quest_reward', q.reward, `📜 퀘스트 완료: ${q.title}`);
+  checkGoalAchieved(q.kidId);
+  saveState();
+  render();
+  toast(`🏆 퀘스트 완료! ${fmt(q.reward)}원 지급`);
+}
+
+function deleteQuest(questId) {
+  confirmModal('퀘스트 삭제', '이 퀘스트를 삭제할까요?', () => {
+    state.quests = state.quests.filter(q => q.id !== questId);
+    saveState();
+    render();
+    toast('퀘스트 삭제됨');
+  });
+}
+
+/* =========================================================
    🔥 연속 달성 (Streak) 보너스
 ========================================================= */
 const STREAK_BONUSES = [
@@ -2079,6 +2203,7 @@ function render() {
   if      (currentView === 'home')   view.innerHTML = renderHome();
   else if (currentView === 'assets') view.innerHTML = renderAssets();
   else if (currentView === 'goals')  view.innerHTML = renderGoals();
+  else if (currentView === 'quests') view.innerHTML = renderQuests();
   else if (currentView === 'shop')   view.innerHTML = renderShop();
   else if (currentView === 'stock')  view.innerHTML = renderStock();
   else if (currentView === 'bank')   view.innerHTML = renderBank();
@@ -2654,6 +2779,97 @@ function renderGoals() {
   `;
 }
 
+/* ----- 📜 퀘스트 페이지 ----- */
+function renderQuests() {
+  return `
+    <div class="card">
+      <h2>📜 퀘스트</h2>
+      <p style="color:var(--ink-soft);font-size:13px;margin-bottom:16px;">
+        부모님이 발행하는 특별 미션이에요. 완료하면 약속한 보상을 받을 수 있어요! 🏆
+      </p>
+
+      ${isAdmin ? `
+        <div class="quest-form-card">
+          <h4 style="font-size:14px;margin-bottom:10px;">✨ 새 퀘스트 발행 (부모님 전용)</h4>
+          <div class="quest-form">
+            <select class="form-select" id="quest-kid">
+              ${state.kids.map(k => `<option value="${k.id}">${k.name}에게</option>`).join('')}
+            </select>
+            <input type="text" class="form-input" id="quest-title" placeholder="퀘스트 내용 (예: 책 3권 읽기)" maxlength="40">
+            <input type="number" class="form-input" id="quest-reward" placeholder="보상 금액" min="100">
+            <input type="date" class="form-input" id="quest-deadline" placeholder="마감일 (선택)">
+            <button class="admin-btn" style="background:var(--primary);" data-action="add-quest">📜 발행</button>
+          </div>
+        </div>
+      ` : `
+        <div class="info-banner">
+          🔒 새 퀘스트는 부모님 모드에서만 발행할 수 있어요. 퀘스트를 완료하면 부모님 비밀번호로 인증 후 보상을 받아요.
+        </div>
+      `}
+
+      ${state.kids.map(kid => {
+        const myQuests = state.quests.filter(q => q.kidId === kid.id);
+        const open = myQuests.filter(q => q.status === 'open');
+        const done = myQuests.filter(q => q.status === 'completed');
+
+        return `
+          <div style="margin-top:20px;">
+            <h3>${kid.name} ${kid.gender === 'boy' ? '👦' : '👧'} · 진행중 ${open.length}개 · 완료 ${done.length}개</h3>
+
+            ${open.length === 0 ? `<div class="empty">진행중인 퀘스트가 없어요</div>` : `
+              <div class="quest-list">
+                ${open.map(q => {
+                  let deadlineHtml = '';
+                  let isLate = false;
+                  if (q.deadline) {
+                    const d = new Date(q.deadline);
+                    const today = new Date(); today.setHours(0,0,0,0);
+                    isLate = d < today;
+                    const dStr = d.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' });
+                    deadlineHtml = `<span class="quest-deadline ${isLate ? 'late' : ''}">${isLate ? '⏰ 마감 지남' : '📅'} ${dStr}까지</span>`;
+                  }
+                  return `
+                    <div class="quest-card open ${isLate ? 'late' : ''}">
+                      <div class="quest-info">
+                        <div class="quest-title">📜 ${q.title}</div>
+                        <div class="quest-meta">
+                          <span class="quest-reward">🏆 ${fmt(q.reward)}원</span>
+                          ${deadlineHtml}
+                        </div>
+                      </div>
+                      <div class="quest-actions">
+                        <button class="quest-complete" data-action="quest-complete" data-id="${q.id}">✓ 완료</button>
+                        ${isAdmin ? `<button class="del-mini-btn" data-action="del-quest" data-id="${q.id}">×</button>` : ''}
+                      </div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            `}
+
+            ${done.length > 0 ? `
+              <h4 style="margin-top:14px;font-size:13px;color:var(--ink-soft);">✅ 완료한 퀘스트 (${done.length})</h4>
+              <div class="quest-list">
+                ${done.slice(0, 5).map(q => `
+                  <div class="quest-card completed">
+                    <div class="quest-info">
+                      <div class="quest-title">✓ ${q.title}</div>
+                      <div class="quest-meta">
+                        <span class="quest-reward">+${fmt(q.reward)}원 받음</span>
+                        <span style="font-size:11px;color:var(--ink-soft);">${new Date(q.completedAt).toLocaleDateString('ko-KR')}</span>
+                      </div>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+}
+
 /* ----- 📊 통계 페이지 ----- */
 function renderStats() {
   // 카테고리별 보상 개수, 이번주/이번달 통계, 연속 기록 등
@@ -2831,6 +3047,19 @@ function attachHandlers() {
         if (!isAdmin) { passwordModal(() => applyPenalty(kidId, 'custom', amount, reason)); }
         else applyPenalty(kidId, 'custom', amount, reason);
       }
+      else if (a === 'add-quest') {
+        if (!isAdmin) { toast('부모님 모드에서만 발행 가능', 'error'); return; }
+        const kidId = document.getElementById('quest-kid').value;
+        const title = document.getElementById('quest-title').value;
+        const reward = document.getElementById('quest-reward').value;
+        const deadline = document.getElementById('quest-deadline').value;
+        addQuest(kidId, title, reward, deadline);
+      }
+      else if (a === 'quest-complete') {
+        if (isAdmin) completeQuest(el.dataset.id);
+        else passwordModal(() => completeQuest(el.dataset.id));
+      }
+      else if (a === 'del-quest') deleteQuest(el.dataset.id);
     };
   });
 }
