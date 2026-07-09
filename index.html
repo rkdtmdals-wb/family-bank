@@ -236,6 +236,102 @@ body {
 
 .reward-grid { display: grid; gap: 8px; }
 
+/* 📦 보상 묶음 */
+.bundle-area {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.bundle-row {
+  display: flex;
+  gap: 6px;
+  align-items: stretch;
+}
+.bundle-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, var(--gold), #f0b95e);
+  color: var(--ink);
+  border: var(--border);
+  border-radius: 14px;
+  font-family: inherit;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.15s;
+  text-align: left;
+}
+.bundle-btn:hover:not(:disabled) { transform: translate(-1px,-1px); box-shadow: 4px 4px 0 var(--ink); }
+.bundle-btn:disabled, .bundle-btn.done {
+  background: #e0e0e0;
+  color: #999;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+.bundle-icon { font-size: 26px; }
+.bundle-info { display: flex; flex-direction: column; }
+.bundle-name { font-weight: 700; font-size: 16px; }
+.bundle-sub { font-size: 12px; opacity: 0.8; margin-top: 2px; }
+.bundle-del {
+  width: 40px;
+  background: var(--bg-2);
+  border: var(--border-thin);
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: 700;
+  font-family: inherit;
+  color: var(--ink);
+}
+.bundle-del:hover { background: var(--danger); color: white; }
+.bundle-add-btn {
+  padding: 12px;
+  background: var(--surface);
+  border: 2px dashed var(--ink);
+  border-radius: 12px;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  color: var(--ink-soft);
+  transition: all 0.15s;
+}
+.bundle-add-btn:hover { background: var(--bg-2); color: var(--ink); }
+
+/* 묶음 만들기 모달 */
+.bundle-select-list {
+  display: grid;
+  gap: 12px;
+  margin: 12px 0;
+}
+.bundle-cat-group {
+  border: var(--border-thin);
+  border-radius: 10px;
+  padding: 10px;
+  background: var(--bg);
+}
+.bundle-cat-title {
+  font-weight: 700;
+  font-size: 13px;
+  margin-bottom: 8px;
+  color: var(--primary);
+}
+.bundle-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+.bundle-check:hover { background: var(--surface); }
+.bundle-check input { width: 18px; height: 18px; cursor: pointer; }
+.bundle-check span:nth-child(2) { flex: 1; }
+.bundle-check-amount { font-weight: 700; color: var(--accent); font-size: 13px; }
+
 .reward-cat-tabs {
   display: flex;
   flex-wrap: wrap;
@@ -1137,6 +1233,7 @@ const DEFAULT_STATE = {
   deposits: [],        // {id, kidId, amount, startTs, termDays, rate, withdrawnAt}
   goals: [],           // {id, kidId, name, emoji, target, ts, achieved}
   quests: [],          // {id, kidId, title, reward, deadline, ts, status: 'open'|'completed'|'rejected'}
+  bundles: [],         // {id, kidId, name, rewardIds: [...]}  자주 주는 보상 묶음
   autoSavings: [],     // {id, kidId, amount, day, lastRunDate}  매주 OO원 자동 저축
   messages: [],        // {id, kidId, text, amount, ts, read}  부모님 깜짝 메시지
   luckyBoxes: {},      // { kidId: { lastClaimDate: 'YYYY-MM-DD', nextDate: 'YYYY-MM-DD' } }
@@ -1368,6 +1465,7 @@ function mergeWithDefaults(saved) {
   merged.transactions = saved?.transactions || [];
   merged.goals        = saved?.goals        || [];
   merged.quests       = saved?.quests       || [];
+  merged.bundles      = saved?.bundles      || [];
   merged.autoSavings  = saved?.autoSavings  || [];
   merged.messages     = saved?.messages     || [];
   merged.luckyBoxes   = saved?.luckyBoxes   || {};
@@ -1671,6 +1769,66 @@ function undoLastReward(kidId) {
   saveState();
   render();
   toast(`마지막 보상 취소됨`);
+}
+
+/* =========================================================
+   📦 보상 묶음 (꾸러미) - 자주 주는 보상을 한 번에
+========================================================= */
+function addBundle(kidId, name, rewardIds) {
+  if (!name || !name.trim()) { toast('묶음 이름을 입력하세요', 'error'); return; }
+  if (!rewardIds || rewardIds.length === 0) { toast('보상을 하나 이상 선택하세요', 'error'); return; }
+  state.bundles.push({
+    id: uid(),
+    kidId,
+    name: name.trim(),
+    rewardIds
+  });
+  saveState();
+  render();
+  toast(`묶음 "${name}" 만들어짐! 📦`);
+}
+
+function deleteBundle(bundleId) {
+  confirmModal('묶음 삭제', '이 묶음을 삭제할까요? (보상 기록은 그대로예요)', () => {
+    state.bundles = state.bundles.filter(b => b.id !== bundleId);
+    saveState();
+    render();
+    toast('묶음 삭제됨');
+  });
+}
+
+// 묶음 지급: 아직 오늘 안 받은 보상만 한꺼번에 지급
+function giveBundle(bundleId) {
+  const bundle = state.bundles.find(b => b.id === bundleId);
+  if (!bundle) return;
+  const kid = getKid(bundle.kidId);
+  if (!kid) return;
+
+  let givenCount = 0;
+  let givenTotal = 0;
+  let skipped = 0;
+
+  bundle.rewardIds.forEach(rid => {
+    const r = REWARDS.find(x => x.id === rid);
+    if (!r) return;
+    if (isRewardClaimedToday(bundle.kidId, rid)) { skipped++; return; }
+    const tx = { id: uid(), kidId: bundle.kidId, type: 'reward', amount: r.amount, desc: r.name, rewardId: rid, ts: now() };
+    state.transactions.unshift(tx);
+    kid.balance += r.amount;
+    givenCount++;
+    givenTotal += r.amount;
+  });
+
+  if (givenCount === 0) {
+    toast(`오늘은 이 묶음의 보상을 이미 다 받았어요! 🌙`, 'error');
+    return;
+  }
+
+  checkGoalAchieved(bundle.kidId);
+  saveState();
+  render();
+  const skipMsg = skipped > 0 ? ` (${skipped}개는 이미 받아서 제외)` : '';
+  toast(`${kid.name}에게 ${givenCount}개 보상 ${fmt(givenTotal)}원 지급!${skipMsg} 🎉`);
 }
 
 function buyItem(kidId, categoryKey, itemId, customPrice = null) {
@@ -2234,6 +2392,8 @@ function renderHome() {
           <div class="balance-big">현재 잔액</div>
           <div class="balance-amount">${fmt(kid.balance)}<span class="unit">원</span></div>
 
+          ${renderBundlesForKid(kid.id)}
+
           <div class="reward-cat-tabs">
             ${cats.map(c => `
               <button class="reward-cat-btn ${c === activeCat ? 'active' : ''}" data-action="reward-cat" data-kid="${kid.id}" data-cat="${c}">${c}</button>
@@ -2261,6 +2421,92 @@ function renderHome() {
     ${renderTransferSection()}
     ${renderCouponsSection()}
   `;
+}
+
+/* ----- 📦 자녀별 묶음 버튼 ----- */
+function renderBundlesForKid(kidId) {
+  const myBundles = state.bundles.filter(b => b.kidId === kidId);
+  let html = '<div class="bundle-area">';
+
+  // 묶음 버튼들
+  if (myBundles.length > 0) {
+    html += myBundles.map(b => {
+      // 오늘 아직 안 받은 보상 개수 계산
+      const pending = b.rewardIds.filter(rid => !isRewardClaimedToday(kidId, rid));
+      const pendingTotal = pending.reduce((sum, rid) => {
+        const r = REWARDS.find(x => x.id === rid);
+        return sum + (r ? r.amount : 0);
+      }, 0);
+      const allDone = pending.length === 0;
+      return `
+        <div class="bundle-row">
+          <button class="bundle-btn ${allDone ? 'done' : ''}" data-action="give-bundle" data-id="${b.id}" ${allDone ? 'disabled' : ''}>
+            <span class="bundle-icon">📦</span>
+            <span class="bundle-info">
+              <span class="bundle-name">${b.name}</span>
+              <span class="bundle-sub">${allDone ? '오늘 다 지급됨 ✓' : `${pending.length}개 · +${fmt(pendingTotal)}원`}</span>
+            </span>
+          </button>
+          ${isAdmin ? `<button class="bundle-del" data-action="del-bundle" data-id="${b.id}">×</button>` : ''}
+        </div>
+      `;
+    }).join('');
+  }
+
+  // 부모님 모드: 새 묶음 만들기 버튼
+  if (isAdmin) {
+    html += `
+      <button class="bundle-add-btn" data-action="new-bundle" data-kid="${kidId}">＋ 새 묶음 만들기</button>
+    `;
+  }
+
+  html += '</div>';
+  return (myBundles.length > 0 || isAdmin) ? html : '';
+}
+
+/* ----- 📦 묶음 만들기 모달 ----- */
+function showBundleModal(kidId) {
+  const kid = getKid(kidId);
+  const cats = [...new Set(REWARDS.map(r => r.cat))];
+  const modal = document.createElement('div');
+  modal.className = 'modal';
+  modal.innerHTML = `
+    <div class="modal-content" style="max-width:520px;max-height:85vh;overflow-y:auto;">
+      <h3>📦 ${kid.name} 새 묶음 만들기</h3>
+      <p>자주 함께 주는 보상들을 골라 묶어두면, 버튼 하나로 한꺼번에 지급할 수 있어요.</p>
+      <input type="text" class="modal-input" id="bundle-name" placeholder="묶음 이름 (예: 매일 기본, 아침 루틴)" maxlength="20">
+      <div class="bundle-select-list">
+        ${cats.map(c => `
+          <div class="bundle-cat-group">
+            <div class="bundle-cat-title">${c}</div>
+            ${REWARDS.filter(r => r.cat === c).map(r => `
+              <label class="bundle-check">
+                <input type="checkbox" value="${r.id}">
+                <span>${r.emoji} ${r.name}</span>
+                <span class="bundle-check-amount">+${fmt(r.amount)}</span>
+              </label>
+            `).join('')}
+          </div>
+        `).join('')}
+      </div>
+      <div class="modal-buttons" style="margin-top:16px;">
+        <button class="cancel" id="bundle-cancel">취소</button>
+        <button class="confirm" id="bundle-save">만들기</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+  const close = () => modal.remove();
+  modal.querySelector('#bundle-cancel').onclick = close;
+  modal.querySelector('#bundle-save').onclick = () => {
+    const name = modal.querySelector('#bundle-name').value;
+    const checked = [...modal.querySelectorAll('input[type=checkbox]:checked')].map(c => c.value);
+    if (!name.trim()) { toast('묶음 이름을 입력하세요', 'error'); return; }
+    if (checked.length === 0) { toast('보상을 하나 이상 선택하세요', 'error'); return; }
+    close();
+    addBundle(kidId, name, checked);
+  };
+  modal.onclick = (e) => { if (e.target === modal) close(); };
 }
 
 /* ----- 🎰 럭키박스 섹션 ----- */
@@ -2979,6 +3225,15 @@ function attachHandlers() {
         }
       }
       else if (a === 'reward-cat'){ rewardCat[el.dataset.kid] = el.dataset.cat; render(); }
+      else if (a === 'give-bundle') {
+        if (isAdmin) giveBundle(el.dataset.id);
+        else passwordModal(() => giveBundle(el.dataset.id));
+      }
+      else if (a === 'new-bundle') {
+        if (isAdmin) showBundleModal(el.dataset.kid);
+        else passwordModal(() => showBundleModal(el.dataset.kid));
+      }
+      else if (a === 'del-bundle') deleteBundle(el.dataset.id);
       else if (a === 'select-kid'){ selectedChild = el.dataset.kid; render(); }
       else if (a === 'clear-selected'){ selectedChild = null; render(); }
       else if (a === 'cat')       { shopCategory = el.dataset.cat; render(); }
