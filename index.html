@@ -375,6 +375,48 @@ body {
 }
 .reward-btn:hover:not(:disabled) { transform: translate(-1px,-1px); box-shadow: 4px 4px 0 var(--ink); }
 .reward-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.reward-btn.big {
+  padding: 20px 20px;
+  font-size: 17px;
+  border-radius: 14px;
+}
+.reward-btn.big .amount { font-size: 19px; }
+
+/* 미션 행 (완료/미달성 나란히) */
+.mission-row {
+  background: var(--bg);
+  border: var(--border-thin);
+  border-radius: 14px;
+  padding: 12px 14px;
+  margin-bottom: 4px;
+}
+.mission-label {
+  font-weight: 700;
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+.mission-btns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.mission-btns .reward-btn {
+  justify-content: center;
+  padding: 14px 10px;
+  font-size: 15px;
+  font-weight: 700;
+}
+.reward-btn.ok { background: var(--accent); }
+.reward-btn.fail { background: var(--danger); }
+.reward-btn.ok.claimed {
+  background: #c8d4cc;
+  color: #4a6b58;
+}
+.reward-btn.fail.failed {
+  background: #e8c0c0;
+  color: #8a3838;
+}
+.reward-btn.ok.claimed:hover, .reward-btn.fail.failed:hover { transform: none; box-shadow: var(--shadow-sm); }
 .reward-btn.claimed {
   background: #c8d4cc;
   color: #5a6b60;
@@ -1257,77 +1299,10 @@ const DEPOSIT_TERMS = [
 ];
 
 const REWARDS = [
-  // 📚 학습
-  { id: 'study',        name: '숙제 다 마치고 놀기',  amount: 2000, emoji: '📚', cat: '학습' },
-  { id: 'reading',      name: '책 한 권 읽기',        amount: 1500, emoji: '📖', cat: '학습' },
-  { id: 'homework',     name: '숙제 끝까지 완료',     amount: 5000, emoji: '✏️', cat: '학습' },
-  { id: 'diary',        name: '일기 쓰기',            amount: 500,  emoji: '📓', cat: '학습' },
-  { id: 'test_score',   name: '시험 100점',           amount: 5000, emoji: '💯', cat: '학습' },
-  { id: 'new_learn',    name: '새로운 것 배우기',     amount: 2000, emoji: '🎓', cat: '학습' },
-  { id: 'math_practice',name: '수학 문제집 풀기',     amount: 1500, emoji: '🔢', cat: '학습' },
-  { id: 'english',      name: '영어 숙제 다 하기',    amount: 1500, emoji: '🔤', cat: '학습' },
-  { id: 'school_well',  name: '학교 잘 다녀오기',     amount: 500,  emoji: '🎒', cat: '학습' },
-
-  // 🏠 집안일
-  { id: 'clean_room',   name: '방 청소 깔끔하게',     amount: 1000, emoji: '🧹', cat: '집안일' },
-  { id: 'chores',       name: '집안일 돕기',          amount: 500,  emoji: '🏠', cat: '집안일' },
-  { id: 'dishes',       name: '설거지 돕기',          amount: 800,  emoji: '🍽️', cat: '집안일' },
-  { id: 'laundry',      name: '빨래 개기',            amount: 700,  emoji: '👕', cat: '집안일' },
-  { id: 'trash',        name: '분리수거 돕기',        amount: 500,  emoji: '♻️', cat: '집안일' },
-  { id: 'make_bed',     name: '이불 스스로 정리',     amount: 300,  emoji: '🛏️', cat: '집안일' },
-  { id: 'pet_care',     name: '반려동물 돌보기',      amount: 700,  emoji: '🐶', cat: '집안일' },
-  { id: 'water_plants', name: '식물 물 주기',         amount: 300,  emoji: '🌱', cat: '집안일' },
-  { id: 'vacuum',       name: '청소기 돌리기',        amount: 800,  emoji: '🧺', cat: '집안일' },
-  { id: 'cook_help',    name: '요리 돕기',            amount: 1000, emoji: '👩‍🍳', cat: '집안일' },
-  { id: 'set_table',    name: '식탁 차리기',          amount: 400,  emoji: '🍴', cat: '집안일' },
-  { id: 'shoe_organize',name: '신발 정리',            amount: 300,  emoji: '👟', cat: '집안일' },
-
-  // 💪 건강
-  { id: 'exercise',     name: '운동하기 30분',        amount: 500,  emoji: '⚽', cat: '건강' },
-  { id: 'early_sleep',  name: '일찍 잠자기',          amount: 500,  emoji: '😴', cat: '건강' },
-  { id: 'eat_well',     name: '반찬 골고루 먹기',     amount: 400,  emoji: '🥗', cat: '건강' },
-  { id: 'brush_teeth',  name: '양치 꼼꼼히',          amount: 200,  emoji: '🪥', cat: '건강' },
-  { id: 'shower',       name: '스스로 씻기',          amount: 300,  emoji: '🚿', cat: '건강' },
-  { id: 'water_drink',  name: '물 많이 마시기',       amount: 200,  emoji: '💧', cat: '건강' },
-  { id: 'walk',         name: '산책·걷기',            amount: 500,  emoji: '🚶', cat: '건강' },
-  { id: 'stretch',      name: '스트레칭',             amount: 300,  emoji: '🧘', cat: '건강' },
-  { id: 'fruit',        name: '과일 챙겨 먹기',       amount: 300,  emoji: '🍎', cat: '건강' },
-
-  // 💝 인성·태도
-  { id: 'help_family',  name: '가족 도와주기',        amount: 500,  emoji: '🤝', cat: '태도' },
-  { id: 'polite',       name: '인사 잘하기',          amount: 300,  emoji: '🙇', cat: '태도' },
-  { id: 'no_fight',     name: '하루종일 안 싸우기',   amount: 1000, emoji: '☮️', cat: '태도' },
-  { id: 'share',        name: '양보·나누기',          amount: 800,  emoji: '💞', cat: '태도' },
-  { id: 'apology',      name: '먼저 사과하기',        amount: 1000, emoji: '🌟', cat: '태도' },
-  { id: 'patience',     name: '참을성 발휘',          amount: 800,  emoji: '🧘', cat: '태도' },
-  { id: 'thanks',       name: '감사 표현',            amount: 300,  emoji: '🙏', cat: '태도' },
-  { id: 'volunteer',    name: '봉사·도움 자원',       amount: 1000, emoji: '🤲', cat: '태도' },
-
-  // 🎨 자기계발
-  { id: 'piano',        name: '피아노 연습',          amount: 1500, emoji: '🎹', cat: '자기계발' },
-  { id: 'instrument',   name: '악기 연습',            amount: 1500, emoji: '🎻', cat: '자기계발' },
-  { id: 'draw',         name: '그림 그리기',          amount: 1000, emoji: '🎨', cat: '자기계발' },
-  { id: 'craft',        name: '만들기 작품',          amount: 1500, emoji: '✂️', cat: '자기계발' },
-  { id: 'write_story',  name: '이야기·글 쓰기',       amount: 1500, emoji: '📝', cat: '자기계발' },
-  { id: 'sing',         name: '노래 연습',            amount: 800,  emoji: '🎤', cat: '자기계발' },
-  { id: 'no_phone',     name: '스마트폰 안 보기',     amount: 1500, emoji: '📵', cat: '자기계발' },
-  { id: 'no_tv',        name: 'TV 안 보기',           amount: 1000, emoji: '📺', cat: '자기계발' },
-
-  // 💪 도전
-  { id: 'first_try',    name: '처음 도전한 일',       amount: 2000, emoji: '🚀', cat: '도전' },
-  { id: 'overcome_fear',name: '무서운 거 극복',       amount: 2500, emoji: '🦸', cat: '도전' },
-  { id: 'finish_hard',  name: '힘든 일 끝까지',       amount: 2000, emoji: '🏁', cat: '도전' },
-  { id: 'stage',        name: '발표·무대 서기',       amount: 3000, emoji: '🎭', cat: '도전' },
-  { id: 'compete',      name: '대회·시합 참가',       amount: 3000, emoji: '🏆', cat: '도전' },
-  { id: 'award',        name: '상장·상 받기',         amount: 10000,emoji: '🥇', cat: '도전' },
-
-  // 🎁 보너스
-  { id: 'surprise',     name: '깜짝 칭찬 보너스',     amount: 3000, emoji: '🎁', cat: '보너스' },
-  { id: 'allowance',    name: '주간 용돈',            amount: 5000, emoji: '💰', cat: '보너스' },
-  { id: 'birthday_help',name: '특별한 날 도움',       amount: 5000, emoji: '🎂', cat: '보너스' },
-  { id: 'good_idea',    name: '좋은 아이디어 제안',   amount: 1500, emoji: '💡', cat: '보너스' },
-  { id: 'save_goal',    name: '저축 목표 달성',       amount: 5000, emoji: '🎯', cat: '보너스' },
-  { id: 'family_event', name: '가족행사 적극참여',    amount: 2000, emoji: '🎉', cat: '보너스' }
+  { id: 'homework',  name: '숙제 다 하기',            amount: 5000, penalty: 3000, emoji: '✏️', cat: '오늘의 미션' },
+  { id: 'polite',    name: '부모님께 예의바르게',      amount: 5000, penalty: 3000, emoji: '🙇', cat: '오늘의 미션' },
+  { id: 'sibling',   name: '남매끼리 사이좋게 지내기',  amount: 5000, penalty: 3000, emoji: '🤝', cat: '오늘의 미션' },
+  { id: 'clean',     name: '방 청소하기',             amount: 5000, penalty: 3000, emoji: '🧹', cat: '오늘의 미션' }
 ];
 
 const SHOP = {
@@ -1740,11 +1715,28 @@ function isRewardClaimedToday(kidId, rewardId) {
   });
 }
 
+// 오늘 이 미션을 미달성(벌점)으로 처리했는지
+function isRewardFailedToday(kidId, rewardId) {
+  const today = getTodayLocalKey();
+  return state.transactions.some(t => {
+    if (t.kidId !== kidId || t.type !== 'reward_fail') return false;
+    if (t.rewardId !== rewardId) return false;
+    const d = new Date(t.ts);
+    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    return key === today;
+  });
+}
+
+// 오늘 이 미션이 이미 처리됐는지 (완료 또는 미달성)
+function isRewardHandledToday(kidId, rewardId) {
+  return isRewardClaimedToday(kidId, rewardId) || isRewardFailedToday(kidId, rewardId);
+}
+
 function addReward(kidId, rewardId) {
   const r = REWARDS.find(x => x.id === rewardId);
   if (!r) return;
-  if (isRewardClaimedToday(kidId, rewardId)) {
-    toast(`오늘은 이미 받았어요! 내일 다시 도전해요 🌙`, 'error');
+  if (isRewardHandledToday(kidId, rewardId)) {
+    toast(`오늘은 이미 처리했어요! 내일 다시 도전해요 🌙`, 'error');
     return;
   }
   // 트랜잭션에 rewardId 저장 (중복 체크용)
@@ -1759,16 +1751,33 @@ function addReward(kidId, rewardId) {
   toast(`${getKid(kidId).name}이(가) ${fmt(r.amount)}원 받았어요! 🎉`);
 }
 
-function undoLastReward(kidId) {
-  const last = state.transactions.find(t => t.kidId === kidId && t.type === 'reward');
-  if (!last) { toast('취소할 보상이 없어요', 'error'); return; }
+// 미션 미달성 → 벌점 차감
+function failReward(kidId, rewardId) {
+  const r = REWARDS.find(x => x.id === rewardId);
+  if (!r || !r.penalty) return;
+  if (isRewardHandledToday(kidId, rewardId)) {
+    toast(`오늘은 이미 처리했어요! 🌙`, 'error');
+    return;
+  }
   const kid = getKid(kidId);
-  if (kid.balance < last.amount) { toast('잔액이 모자라서 취소할 수 없어요', 'error'); return; }
+  const tx = { id: uid(), kidId, type: 'reward_fail', amount: -r.penalty, desc: `${r.name} 미달성`, rewardId, ts: now() };
+  state.transactions.unshift(tx);
+  if (kid) kid.balance -= r.penalty;
+  saveState();
+  render();
+  toast(`${kid.name} ${fmt(r.penalty)}원 차감됐어요 😢`, 'error');
+}
+
+function undoLastReward(kidId) {
+  const last = state.transactions.find(t => t.kidId === kidId && (t.type === 'reward' || t.type === 'reward_fail'));
+  if (!last) { toast('취소할 기록이 없어요', 'error'); return; }
+  const kid = getKid(kidId);
+  // 보상이면 뺀 만큼 돌려주고, 벌점이면 뺀 금액을 더해줌 (amount가 음수라 -= 로 복구됨)
   kid.balance -= last.amount;
   state.transactions = state.transactions.filter(t => t.id !== last.id);
   saveState();
   render();
-  toast(`마지막 보상 취소됨`);
+  toast(`마지막 기록 취소됨`);
 }
 
 /* =========================================================
@@ -2376,11 +2385,11 @@ function renderHome() {
   return `
     ${!isAdmin ? `
       <div class="info-banner">
-        🔒 보상 버튼을 누르면 부모님 비밀번호가 필요해요! · ⏰ 각 보상은 <strong>하루에 한 번씩만</strong> 받을 수 있어요 (자정에 초기화)
+        🔒 버튼을 누르면 부모님 비밀번호가 필요해요! · ✅ 달성하면 +5,000원, ❌ 못하면 -3,000원 · 각 미션은 <strong>하루 한 번</strong> (자정 초기화)
       </div>
     ` : `
       <div class="info-banner admin">
-        🔓 부모님 모드 · ⏰ 각 보상은 하루 한 번 (자정 초기화)
+        🔓 부모님 모드 · ✅ 달성 +5,000원 / ❌ 미달성 -3,000원 · 하루 한 번 (자정 초기화)
       </div>
     `}
     <div class="kids-grid">
@@ -2394,24 +2403,35 @@ function renderHome() {
 
           ${renderBundlesForKid(kid.id)}
 
+          ${cats.length > 1 ? `
           <div class="reward-cat-tabs">
             ${cats.map(c => `
               <button class="reward-cat-btn ${c === activeCat ? 'active' : ''}" data-action="reward-cat" data-kid="${kid.id}" data-cat="${c}">${c}</button>
             `).join('')}
           </div>
+          ` : ''}
 
           <div class="reward-grid">
-            ${REWARDS.filter(r => r.cat === activeCat).map(r => {
+            ${REWARDS.filter(r => cats.length > 1 ? r.cat === activeCat : true).map(r => {
               const claimed = isRewardClaimedToday(kid.id, r.id);
+              const failed = isRewardFailedToday(kid.id, r.id);
+              const handled = claimed || failed;
               return `
-              <button class="reward-btn ${claimed ? 'claimed' : ''}" data-action="reward" data-kid="${kid.id}" data-reward="${r.id}" ${claimed ? 'disabled' : ''}>
-                <span>${r.emoji} ${r.name}</span>
-                <span class="amount">${claimed ? '✓ 완료' : '+' + fmt(r.amount)}</span>
-              </button>
+              <div class="mission-row">
+                <div class="mission-label">${r.emoji} ${r.name}</div>
+                <div class="mission-btns">
+                  <button class="reward-btn ok ${claimed ? 'claimed' : ''}" data-action="reward" data-kid="${kid.id}" data-reward="${r.id}" ${handled ? 'disabled' : ''}>
+                    ${claimed ? '✓ 완료' : '✅ +' + fmt(r.amount)}
+                  </button>
+                  <button class="reward-btn fail ${failed ? 'failed' : ''}" data-action="fail" data-kid="${kid.id}" data-reward="${r.id}" ${handled ? 'disabled' : ''}>
+                    ${failed ? '✗ 미달성' : '❌ -' + fmt(r.penalty)}
+                  </button>
+                </div>
+              </div>
             `;}).join('')}
           </div>
           <button class="undo-btn" data-action="undo" data-kid="${kid.id}">
-            ↩️ ${kid.name} 마지막 보상 취소
+            ↩️ ${kid.name} 마지막 기록 취소
           </button>
         </div>
       `;}).join('')}
@@ -3215,6 +3235,13 @@ function attachHandlers() {
           addReward(el.dataset.kid, el.dataset.reward);
         } else {
           passwordModal(() => addReward(el.dataset.kid, el.dataset.reward));
+        }
+      }
+      else if (a === 'fail') {
+        if (isAdmin) {
+          failReward(el.dataset.kid, el.dataset.reward);
+        } else {
+          passwordModal(() => failReward(el.dataset.kid, el.dataset.reward));
         }
       }
       else if (a === 'undo') {
